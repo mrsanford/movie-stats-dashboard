@@ -39,6 +39,6 @@ To launch the application and to begin visualization, clone the repository and r
 
 ## Acknowledgements
 The inspiration for this project comes from my love of movies, statistics, and Letterboxd. The data from the project was collected from the following sources:
-1. [u/asaniczka]([url](https://github.com/asaniczka))'s ['Full TMDB Movies Dataset 202 (1M Movies)'](([url](https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies))) via Kaggle
-2. [u/ChidambaraRaju]([url](https://github.com/ChidambaraRaju))'s ['IMDb Movie Dataset: All Movies by Genre']([url](https://www.kaggle.com/datasets/rajugc/imdb-movies-dataset-based-on-genre)) via Kaggle
-3. Movie Budget webpages from [The-Numbers.com]([url](https://www.the-numbers.com/movie/budgets/all))
+1. [u/asaniczka](https://github.com/asaniczka)'s ["Full TMDB Movies Dataset 2024 (1M Movies)"](https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies) via Kaggle
+2. [u/ChidambaraRaju](https://github.com/ChidambaraRaju)'s ['IMDb Movie Dataset: All Movies by Genre'](https://www.kaggle.com/datasets/rajugc/imdb-movies-dataset-based-on-genre) via Kaggle
+3. Movie Budget data from [The-Numbers.com](https://www.the-numbers.com/movie/budgets/all)
