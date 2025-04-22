@@ -57,7 +57,7 @@ COLUMN_MAPPING = {
         "spoken_languages": "spoken_languages",
     },
     "genres": {
-        "movie_id": "movie_id", 
+        "movie_id": "movie_id",
         "movie_name": "title",
         "normalized_movie_name": "normalized_title",
         "year": "year",
@@ -84,17 +84,105 @@ COLUMN_MAPPING = {
     "shared": {"decade": "decade"},
 }
 
-TMDB_COL_ORDER = ["id", "movie_id", "title", "normalized_title",
-    "release_date", "year", "decade", "rating", "votes",
-    "status",  "runtime", "adult", "budget", "revenue",
-    "overview", "popularity", "tagline", "genres",
-    "original_language", "original_title",
-    "production_companies", "production_countries",
-    "spoken_languages", "keywords"]
+TMDB_COL_ORDER = [
+    "id",
+    "movie_id",
+    "title",
+    "normalized_title",
+    "release_date",
+    "year",
+    "decade",
+    "rating",
+    "votes",
+    "status",
+    "runtime",
+    "adult",
+    "budget",
+    "revenue",
+    "overview",
+    "popularity",
+    "tagline",
+    "genres",
+    "original_language",
+    "original_title",
+    "production_companies",
+    "production_countries",
+    "spoken_languages",
+    "keywords",
+]
 
-GENRE_COL_ORDER = ["movie_id", "title", "normalized_title",
-    "year", "decade", "certificate", "runtime", "genre", "description", "rating",
-    "votes", "director", "star", "total_gross"]
+GENRE_COL_ORDER = [
+    "movie_id",
+    "title",
+    "normalized_title",
+    "year",
+    "decade",
+    "certificate",
+    "runtime",
+    "genre",
+    "description",
+    "rating",
+    "votes",
+    "director",
+    "star",
+    "total_gross",
+]
 
-BUDGET_COL_ORDER = ["index", "title", "normalized_title", "release_date", "year", "decade",
-    "production_budget", "domestic_gross", "worldwide_gross"]
+BUDGET_COL_ORDER = [
+    "index",
+    "title",
+    "normalized_title",
+    "release_date",
+    "year",
+    "decade",
+    "production_budget",
+    "domestic_gross",
+    "worldwide_gross",
+]
+
+RATING_MAP = {
+    # Rated G
+    "G": "G",
+    "TV-G": "G",
+    "U": "G",
+    "E": "G",
+    "E10+": "G",
+    "TV-Y": "G",
+    # Rated PG
+    "PG": "PG",
+    "TV-PG": "PG",
+    "TV-Y7": "PG",
+    "M": "PG",
+    "UA": "PG",
+    "M/PG": "PG",
+    "Open": "PG",
+    "UA 7+": "PG",
+    "GP": "PG",
+    "TV-Y7-FV": "PG",
+    # Rated PG-13
+    "PG-13": "PG-13",
+    "TV-14": "PG-13",
+    "13+": "PG-13",
+    "TV-13": "PG-13",
+    "UA 13+": "PG-13",
+    "13": "PG-13",
+    # Rated R
+    "R": "R",
+    "TV-MA": "R",
+    "16": "R",
+    "16+": "R",
+    "18": "R",
+    "18+": "R",
+    "UA 16+": "R",
+    "MA-13": "R",
+    "MA-17": "R",
+    # Rated NC-17
+    "NC-17": "NC-17",
+    "X": "NC-17",
+    "AO": "NC-17",
+    # Others
+    "Approved": "Approved",
+    "Passed": "Passed",
+    "Unrated": "Unrated",
+    "Not Rated": "NR",
+}

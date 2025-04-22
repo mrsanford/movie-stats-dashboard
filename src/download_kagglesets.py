@@ -21,7 +21,7 @@ def download_tmdb_data(tmdb_path: str = TMDB_RAW_PATH) -> None:
     # coping only .csv files into directed folder
     csv_files = [file for file in os.listdir(download_path) if file.endswith(".csv")]
     print(f"Found {len(csv_files)} CSV files in download.")
-    for i, file in csv_files:
+    for i, file in enumerate(csv_files):
         src = os.path.join(download_path, file)
         dst = os.path.join(tmdb_path, "tmdb.csv" if i == 0 else file)
         if not os.path.exists(dst):

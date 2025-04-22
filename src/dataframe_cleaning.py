@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 import glob
 import os
 from src.helpers import (
@@ -13,18 +14,20 @@ from src.helpers import (
     TMDB_COL_ORDER,
     GENRE_COL_ORDER,
     BUDGET_COL_ORDER,
+    COLUMN_MAPPING,
+    RATING_MAP,
 )
 
 
 def load_stack_csvs(folder_path: str = GENRES_RAW_PATH):
     """
-    Loads and stacks all csvs from a target folder and
-    stacks them into a single dataframe
+    Loads and stacks any/all available CSV files from a specified folder
+    into a single DataFrame
     ---
     Args:
-        genres_path (str): the path to the raw genre csvs
+        folder_path (str): Path to the folder containing the raw CSV files
     Returns:
-        the full pd.DataFrame
+        pd.DataFrame: concatenated DataFrame of all CSV files
     """
     csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
     dfs = [pd.read_csv(f) for f in csv_files]
@@ -37,6 +40,13 @@ def normalize_title_column(
     """
     Creates a new column of normalized movie titles (lowercases, removed
     nonalphanumeric characters, whitespace)
+    ---
+    Args:
+        df (pd.DataFrame): the input DataFrame
+        column (str): column containing original movie titles
+        new_column (str): the name of the new normalized column
+    Returns:
+        pd.DataFrame: DataFrame with the added normalized title column
     """
     df[new_column] = (
         df[column]
@@ -50,8 +60,13 @@ def normalize_title_column(
 
 def drop_unused_columns(df: pd.DataFrame, cols_to_drop: list) -> pd.DataFrame:
     """
-    Drops target columns that will not be used in analysis
-    in pd.DataFrame based on the list of columns to drop
+    Dropping specified columns from the DataFrame
+    ---
+    Args:
+        df (pd.DataFrame): the input DataFrame
+        cols_to_drop (list): the list of column names to drop
+    Returns:
+        pd.DataFrame: DataFrame with specified columns removed
     """
     # df.drop([col for col in cols_to_drop if col in df.columns])
     return df.drop(columns=cols_to_drop, errors="ignore")
@@ -61,7 +76,14 @@ def extract_year(
     df: pd.DataFrame, date_column: str, output_column: str = "year"
 ) -> pd.DataFrame:
     """
-    Extracts just the year from the target date column
+    Extracts the year from the target date column and stores in a new column
+    ---
+    Args:
+        df (pd.DataFrame): input DataFrame
+        date_column (str): name of column with dates
+        output_column (str): name of new column to store year
+    Returns:
+        pd.DataFrame: DataFrame with added 'year' column
     """
     df[output_column] = pd.to_datetime(df[date_column], errors="coerce").dt.year.astype(
         "Int64"
@@ -71,10 +93,13 @@ def extract_year(
 
 def group_decades(year: int) -> None:
     """
-    Categorizes a single year under a larger decade label.
-    For example: the year 1986 will return '1980-1989'
+    Converts year into decade label and adds new 'decade' column (e.g.,
+    1986 -> '1980-1989')
     ---
-    Returns: None if year is missing or invalid
+    Args:
+        year (int): the year to convert
+    Returns:
+        str: decade label or None if year is missing or invalid
     """
     try:
         start = int(year) // 10 * 10
@@ -84,6 +109,29 @@ def group_decades(year: int) -> None:
         return None
 
 
+def standardize_columns(
+    df: pd.DataFrame, source: str, column_order: list = None
+) -> pd.DataFrame:
+    """
+    Renames and reorders columns for standardization (SQL support) and improved readability
+    ---
+    Args:
+        df (pd.DataFrame): input DataFrame
+        source (str): the dataset source key (e.g., 'tmdb', 'genres', 'budget')
+        column_order (list): final desired column order
+    Returns:
+        pd.DataFrame: DataFrame wih renamed columns (option to reorder too)
+    """
+    rename_map = {
+        **COLUMN_MAPPING.get(source, {}),
+        **COLUMN_MAPPING.get("shared", {}),
+    }
+    df = df.rename(columns=rename_map)
+    if column_order:
+        df = df.reindex(columns=column_order)
+    return df
+
+
 def clean_tmdb_to_csv(
     raw_path: str = TMDB_RAW_PATH,
     cols_to_drop: list = TMDB_COLS_TO_DROP,
@@ -91,21 +139,16 @@ def clean_tmdb_to_csv(
     column_order: list = TMDB_COL_ORDER,
 ) -> pd.DataFrame:
     """
-    Cleans the TMDb dataset and exports to CSV
+    Loads, cleans, and standardizes the TMDb dataset before exporting it to a processed CSV
+    ---
+    Args:
+        raw_path (str): path to the raw TMDb CSV folder
+        cols_to_drop (list): list of columns to drop
+        output_path (str): path to save the cleaned CSV
+        column_order (list): final column order for the output CSV
+    Returns:
+        pd.DataFrame: the cleaned TMDb dataset
     """
-
-    def filter_tmdb_csv(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Further filters rows in tmdb.csv where:
-        - observation in 'title' is missing/blank
-        - all of runtime, revenue, AND budget are missing or 0
-        - 'status' is not 'Released'
-        """
-        df = df[df["title"].notna() & (df["title"].str.strip() != "")]
-        df = df[~df[["runtime", "revenue", "budget"]].fillna(0).eq(0).all(axis=1)]
-        df = df[df["status"] == "Released"]
-        return df
-
     # loading and concatenating any TMDb related CSVs
     tmdb_df = load_stack_csvs(raw_path)
     # dropping unnecessary columns
@@ -115,25 +158,30 @@ def clean_tmdb_to_csv(
         tmdb_df, column="title", new_column="normalized_title"
     )
     # filtering TMDb for invalid/null data
-    if all(
-        col in tmdb_df.columns
-        for col in ["runtime", "revenue", "budget", "status", "title"]
-    ):
-        tmdb_df = filter_tmdb_csv(tmdb_df)
-    else:
-        print("TMDB DataFrame does not have the necessary columns to filter.")
+    tmdb_df = tmdb_df[
+        ~tmdb_df[["runtime", "revenue", "budget"]].fillna(0).eq(0).all(axis=1)
+    ]
+    # filtering TMDb for only 'Released' movies
+    tmdb_df = tmdb_df[tmdb_df["status"] == "Released"]
     # filtering out adult content
     if "adult" in tmdb_df.columns:
         tmdb_df = tmdb_df[tmdb_df["adult"].astype(str).str.lower() != "true"]
     # extracting the year
     if "release_date" in tmdb_df.columns:
         tmdb_df = extract_year(tmdb_df, date_column="release_date")
+    # dropping where years are NaN, then turns in values into type int for handling
+    tmdb_df = tmdb_df.dropna(subset=["year"])
+    tmdb_df["year"] = tmdb_df["year"].astype(int)
     # adding decades
     tmdb_df["decade"] = tmdb_df["year"].apply(group_decades)
+    # handling mistyped years
+    tmdb_df = tmdb_df[(tmdb_df["year"] >= 1880) & (tmdb_df["year"] <= 2025)]
+    # dropping row if the title is empty
+    tmdb_df = tmdb_df[tmdb_df["title"].notna() & (tmdb_df["title"].str.strip() != "")]
     # dropping any duplicates by the normalized title
     tmdb_df = tmdb_df.drop_duplicates(subset=["normalized_title", "year"])
-    # reordering columns
-    tmdb_df = tmdb_df[column_order]
+    # renaming and reordering columns
+    tmdb_df = standardize_columns(tmdb_df, source="tmdb", column_order=column_order)
     # alphabetizing results
     tmdb_df = tmdb_df.sort_values(by="title", ascending=True)
     # outputting to CSV
@@ -150,7 +198,17 @@ def clean_genres_to_csv(
     output_path: str = GENRES_OUTPUT_PATH,
     column_order: list = GENRE_COL_ORDER,
 ):
-    """ """
+    """
+    Loads, cleans, and standardizes the genres dataset before exporting to CSV
+    ---
+    Args:
+        raw_path (str): path to the raw genres CSV folder
+        cols_to_drop (list): list of columns to drop
+        output_path (str): path to save the cleaned CSV
+        column_order (list): final column order for the output CSV
+    Returns:
+        pd.DataFrame: cleaned genres dataset
+    """
     # loading all available genre.csvs and stacking to single dataframe
     genres_df = load_stack_csvs(raw_path)
     # normalizing genre movie names
@@ -164,11 +222,28 @@ def clean_genres_to_csv(
     genres_df["total_gross"] = genres_df["gross(in $)"]
     # dropping unused columns
     genres_df = drop_unused_columns(genres_df, cols_to_drop)
+    # dropping rating values and mapping ratings to MPA's US Rating System
+    drop_ratings = {
+        "A",
+        "T",
+        "12",
+        "7",
+    }  # eliminating vaguely rated outliers and videogames
+    genres_df = genres_df.loc[~genres_df["certificate"].isin(drop_ratings)].copy()
+    genres_df["certificate"] = (
+        genres_df["certificate"].map(RATING_MAP).fillna("Not Rated")
+    )
+    # normalizing years
+    ## if year not XXXX 'str' year, drop the columns with roman numerals
+    ## if the year > 2025, drop
+    # if the values for year, decade, runtime, rating, votes, and total gross are NaN, drop the column
+
     # grouping decades
     genres_df["decade"] = genres_df["year"].apply(group_decades)
-    # reordering columns
-    target_order = column_order
-    genres_df = genres_df[target_order]
+    # renaming and reordering columns
+    genres_df = standardize_columns(
+        genres_df, source="genres", column_order=column_order
+    )
     # ouputting results to clean CSV
     genres_df.to_csv(output_path, index=False)
     return genres_df
@@ -180,18 +255,25 @@ def clean_budgets_to_csv(
     column_order: list = BUDGET_COL_ORDER,
 ) -> pd.DataFrame:
     """
-    Loads the Budget CSV from the raw subfolder 'budgets,' indexes the year and creates a new
-    column 'year'
-    Then outputs a new CSV to the processed folder
+    Loads, cleans, and standardizes the budget dataset before exporting to CSV
     ---
     Args:
-        raw_path (str) is the path to 'budgets' subfolder
-        output_path (str) is the path to the processed file
+        raw_path (str): path to the raw budget CSV folder
+        output_path (str): path to save the cleaned CSV
+        column_order (list): final column order for the output CSV
+    Returns:
+        pd.DataFrame: cleaned budget dataset
     """
     # loading in the available budget data
     budgets_df = load_stack_csvs(raw_path)
-    # extracting the year value from the 'Release Date' column
+    # dropping dates that are > than the current date
     if "Release Date" in budgets_df.columns:
+        budgets_df["Release Date"] = pd.to_datetime(
+            budgets_df["Release Date"], errors="coerce"
+        )
+        today = pd.to_datetime(datetime.today())
+        budgets_df = budgets_df[budgets_df["Release Date"] <= today]
+        # extracting the year value from the 'Release Date' column
         budgets_df = extract_year(budgets_df, date_column="Release Date")
     # normalizing movie titles & creating new column
     budgets_df = normalize_title_column(
@@ -201,10 +283,12 @@ def clean_budgets_to_csv(
     budgets_df = budgets_df.drop_duplicates(subset=["normalized_title", "year"])
     # grouping decades
     budgets_df["decade"] = budgets_df["year"].apply(group_decades)
-    # reordering columns
-    budgets_df = budgets_df[column_order]
+    # renaming and reordering columns
+    budgets_df = standardize_columns(
+        budgets_df, source="budget", column_order=column_order
+    )
     # sorting the values alphabetically by movie title
-    budgets_df = budgets_df.sort_values(by="Movie", ascending=True)
+    budgets_df = budgets_df.sort_values(by="title", ascending=True)
     # outputting to csv
     budgets_df.to_csv(output_path, index=False)
     return budgets_df
