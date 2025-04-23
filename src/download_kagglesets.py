@@ -2,57 +2,44 @@
 import os
 import shutil
 import kagglehub
-from src.helpers import GENRES_RAW_PATH, TMDB_RAW_PATH
+from src.utils.logging import setup_logger
 
 
-def download_tmdb_data(tmdb_path: str = TMDB_RAW_PATH) -> None:
+def download_kaggle_dataset(
+    kaggle_id: str,
+    output_dir: str,
+    target_filename: str = None,
+    logger_name: str = "kaggle_downloader",
+    log_filepath: str = "downloads",
+) -> None:
     """
-    Downloads the TMDB dataset from Kaggle and names the raw file 'tmdb.csv'
+    Downloads a dataset from Kaggle and saves all CSVs to an output directory.
+    Saves the logging progress.
+    ---
+    Args:
+        kaggle_id (str): Kaggle dataset identifier (e.g., "username/dataset-name")
+        output_dir (str): local directory to save the files
     """
-    print(f"Downloading TMDB Movies Dataset to {tmdb_path}")
 
-    # downloading dataset via kagglehub
-    download_path = kagglehub.dataset_download(
-        "asaniczka/tmdb-movies-dataset-2023-930k-movies"
-    )
-    print(f"Download complete. Raw files located at: {tmdb_path}")
-    # ensuring the output directory exists
-    os.makedirs(tmdb_path, exist_ok=True)
-    # coping only .csv files into directed folder
+    # calling the loggers
+    logger = setup_logger(logger_name, log_filepath)
+    logger.info(f"Downloading dataset '{kaggle_id}' to {output_dir}")
+
+    download_path = kagglehub.dataset_download(kaggle_id)
+    logger.info("Download complete")
+
+    os.makedirs(output_dir, exist_ok=True)
     csv_files = [file for file in os.listdir(download_path) if file.endswith(".csv")]
-    print(f"Found {len(csv_files)} CSV files in download.")
+    logger.info(f"Found {len(csv_files)} CSV files")
+
     for i, file in enumerate(csv_files):
         src = os.path.join(download_path, file)
-        dst = os.path.join(tmdb_path, "tmdb.csv" if i == 0 else file)
+        dst_name = target_filename if (target_filename and i == 0) else file
+        dst = os.path.join(output_dir, dst_name)
+
         if not os.path.exists(dst):
             shutil.copy(src, dst)
-            print(f"Copied: {file} → {dst}")
+            logger.info(f"Copied {file} → {dst}")
         else:
-            print(f"Skipped (already exists): {file}")
-
-
-def download_genre_data(genres_path: str = GENRES_RAW_PATH) -> None:
-    """
-    Downloads the genres data
-    """
-    # downloading dataset via kagglehub
-    print(f"Downloading dataset from KaggleHub to {genres_path}")
-    download_path = kagglehub.dataset_download(
-        "rajugc/imdb-movies-dataset-based-on-genre"
-    )
-    print(f"Download complete. Raw files located at: {genres_path}")
-
-    # ensuring the output directory exists
-    os.makedirs(genres_path, exist_ok=True)
-    # copying CSVs to genre folder
-    csv_files = [file for file in os.listdir(download_path) if file.endswith(".csv")]
-    print(f"Found {len(csv_files)} CSV files in download.")
-    for file in csv_files:
-        src = os.path.join(download_path, file)
-        dst = os.path.join(genres_path, file)
-        if not os.path.exists(dst):
-            shutil.copy(src, dst)
-            print(f"Copied: {file} → {dst}")
-        else:
-            print(f"Skipped (already exists): {file}")
+            logger.info(f"Skipped {file}. Already exists")
     return
