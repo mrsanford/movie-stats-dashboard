@@ -2,6 +2,7 @@ import os
 
 # Root Paths
 PATH_DATA = "data"
+LOGS_DATA = "logs"
 PROCESSED_DATA = "processed"
 RAW_DATA = "raw"
 
@@ -18,6 +19,10 @@ PROCESSED_PATH = os.path.join(PATH_DATA, PROCESSED_DATA)
 GENRES_OUTPUT_PATH = os.path.join(PROCESSED_PATH, "genres.csv")
 TMDB_OUTPUT_PATH = os.path.join(PROCESSED_PATH, "tmdb.csv")
 BUDGET_OUTPUT_PATH = os.path.join(PROCESSED_PATH, "budgets.csv")
+
+# Kaggle IDs (username/dataset)
+KAGGLE_TMDB = "asaniczka/tmdb-movies-dataset-2023-930k-movies"
+KAGGLE_IMDB = "rajugc/imdb-movies-dataset-based-on-genre"
 
 # Columns to Drop
 GENRE_COLS_TO_DROP = [
