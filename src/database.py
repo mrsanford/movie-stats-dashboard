@@ -124,16 +124,16 @@ class MovieDB(BaseDB):
             CREATE TABLE IF NOT EXISTS tMovie (
                 movie_id TEXT PRIMARY KEY,
                 title TEXT,
-                release_year TEXT,
+                year INTEGER CHECK (year BETWEEN 1850 AND 2025),
+                decade TEXT,
                 certificate TEXT,
-                runtime_minutes INTEGER,
-                average_vote REAL,
-                vote_count INTEGER,
-                release_status TEXT,
+                runtime INTEGER,
+                rating REAL,
+                votes INTEGER,
                 imdb_id TEXT,
                 language TEXT,
-                movie_overview TEXT, 
-                movie_tagline TEXT,
+                description TEXT, 
+                tagline TEXT,
                 popularity_score REAL
             );"""
         self.run_action(sql)
