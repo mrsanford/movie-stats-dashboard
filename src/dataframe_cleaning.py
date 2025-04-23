@@ -140,6 +140,16 @@ def clean_tmdb_to_csv(
 ) -> pd.DataFrame:
     """
     Loads, cleans, and standardizes the TMDb dataset before exporting it to a processed CSV
+    Steps for cleaning TMDb include
+        1. instantly dropping unnecessary columns
+        2. normalizing all movie titles
+        3. dropping rows where 'title' is empty
+        3. filtering rows where there is NaN or 0.0 value for runtime, revenue, AND budget
+        4. selecting only 'Released' movies
+        5. removing pornography
+        6. extracting years, grouping by decade, and handling errors/edge cases
+        7. dropping duplicate movies by normalized_name and year
+        8. reordering columns, alphabetizing by title, and outputting to csv
     ---
     Args:
         raw_path (str): path to the raw TMDb CSV folder
@@ -149,7 +159,6 @@ def clean_tmdb_to_csv(
     Returns:
         pd.DataFrame: the cleaned TMDb dataset
     """
-    # loading and concatenating any TMDb related CSVs
     tmdb_df = load_stack_csvs(raw_path)
     # dropping unnecessary columns
     tmdb_df = drop_unused_columns(tmdb_df, cols_to_drop)
@@ -157,6 +166,8 @@ def clean_tmdb_to_csv(
     tmdb_df = normalize_title_column(
         tmdb_df, column="title", new_column="normalized_title"
     )
+    # dropping row if the title is empty
+    tmdb_df = tmdb_df[tmdb_df["title"].notna() & (tmdb_df["title"].str.strip() != "")]
     # filtering TMDb for invalid/null data
     tmdb_df = tmdb_df[
         ~tmdb_df[["runtime", "revenue", "budget"]].fillna(0).eq(0).all(axis=1)
@@ -176,8 +187,6 @@ def clean_tmdb_to_csv(
     tmdb_df["decade"] = tmdb_df["year"].apply(group_decades)
     # handling mistyped years
     tmdb_df = tmdb_df[(tmdb_df["year"] >= 1880) & (tmdb_df["year"] <= 2025)]
-    # dropping row if the title is empty
-    tmdb_df = tmdb_df[tmdb_df["title"].notna() & (tmdb_df["title"].str.strip() != "")]
     # dropping any duplicates by the normalized title
     tmdb_df = tmdb_df.drop_duplicates(subset=["normalized_title", "year"])
     # renaming and reordering columns
@@ -200,6 +209,9 @@ def clean_genres_to_csv(
 ):
     """
     Loads, cleans, and standardizes the genres dataset before exporting to CSV
+    1. normalizes movie names
+    2. drops duplicates by movid_id first, and then by normalized_title + year as a fallback
+    3.
     ---
     Args:
         raw_path (str): path to the raw genres CSV folder
@@ -233,11 +245,14 @@ def clean_genres_to_csv(
     genres_df["certificate"] = (
         genres_df["certificate"].map(RATING_MAP).fillna("Not Rated")
     )
-    # normalizing years
-    ## if year not XXXX 'str' year, drop the columns with roman numerals
-    ## if the year > 2025, drop
+    # cleaning and processing only valid 4 digit years between 1880 - 2025
+    genres_df["year"] = genres_df["year"].astype(str).str.strip()
+    genres_df = genres_df[
+        genres_df["year"].str.fullmatch(r"\d{4}")  # must be exactly 4 digits
+    ].copy()
+    genres_df["year"] = genres_df["year"].astype(int)
+    genres_df = genres_df[(genres_df["year"] >= 1880) & (genres_df["year"] <= 2025)]
     # if the values for year, decade, runtime, rating, votes, and total gross are NaN, drop the column
-
     # grouping decades
     genres_df["decade"] = genres_df["year"].apply(group_decades)
     # renaming and reordering columns
