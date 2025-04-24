@@ -133,6 +133,16 @@ def standardize_columns(
     return df
 
 
+def add_normalized_title_year(df: pd.DataFrame, title_col: str, year_col: str = "year"):
+    return df.assign(
+        normalized_title_year=(
+            df[title_col].astype(str).str.strip().str.lower()
+            + "_"
+            + df[year_col].astype(str).str.strip()
+        )
+    )
+
+
 def clean_tmdb_to_csv(
     raw_path: str = TMDB_RAW_PATH,
     cols_to_drop: list = TMDB_COLS_TO_DROP,
@@ -185,6 +195,10 @@ def clean_tmdb_to_csv(
     if "release_date" in tmdb_df.columns:
         tmdb_df = extract_year(tmdb_df, date_column="release_date")
         logger.info("'year' extracted from 'release_date'")
+
+    # generating fallback merge key: normalized_title + year
+    tmdb_df = add_normalized_title_year(tmdb_df, title_col="normalized_title")
+    logger.info("Created 'normalized_title_year' column for fallback merging.")
 
     # filtering TMDb for invalid/null data
     tmdb_df = tmdb_df[
@@ -270,6 +284,10 @@ def clean_genres_to_csv(
     genres_df = genres_df[(genres_df["year"] >= 1880) & (genres_df["year"] <= 2025)]
     logger.info("'year' column cleaned and validated.")
 
+    # generating fallback merge key: normalized_title + year
+    genres_df = add_normalized_title_year(genres_df, title_col="normalized_movie_name")
+    logger.info("Created 'normalized_title_year' column for fallback merging.")
+
     # grouping decades
     genres_df["decade"] = genres_df["year"].apply(group_decades)
     logger.info("Grouped data by decade.")
@@ -350,6 +368,10 @@ def clean_budgets_to_csv(
         "Dropped %d duplicate rows by normalized title and year.",
         pre_dupes - len(budgets_df),
     )
+
+    # generating fallback merge key: normalized_title + year
+    budgets_df = add_normalized_title_year(budgets_df, title_col="normalized_title")
+    logger.info("Created 'normalized_title_year' column for fallback merging.")
 
     # grouping decades
     budgets_df["decade"] = budgets_df["year"].apply(group_decades)
