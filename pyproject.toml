@@ -9,6 +9,7 @@ dependencies = [
     "kagglehub>=0.3.11",
     "lxml>=5.3.2",
     "pandas>=2.2.3",
+    "pyqt5>=5.15.11",
     "requests>=2.32.3",
     "tqdm>=4.67.1",
 ]
