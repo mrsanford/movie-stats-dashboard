@@ -80,6 +80,7 @@ COLUMN_MAPPING = {
         "Index": "index",
         "Movie": "title",
         "normalized_title": "normalized_title",
+        "normalized_title_year" : "normalized_title_year",
         "Release Date": "release_date",
         "year": "year",
         "Production Budget": "production_budget",
@@ -89,25 +90,19 @@ COLUMN_MAPPING = {
     "shared": {"decade": "decade"},
 }
 
+# Pruned Analysis Columns
+PRUNED_TMDB_COLS = ['movie_id', 'title', 'normalized_title', 'normalized_title_year',
+                    'release_date', 'year', 'decade', 'rating', 'votes', 'runtime',
+                    'genre', 'budget', 'worldwide_gross', 'description', 'production_countries']
 
-IMPORTANT_TMDB_COLS = [
-    'movie_id', 'title', 'normalized_title', 'normalized_title_year',
-    'release_date', 'year', 'decade', 'rating', 'votes', 'runtime',
-    'genre', 'budget', 'worldwide_gross', 'description', 'production_countries'
-]
+PRUNED_GENRE_COLS = ['movie_id', 'title', 'normalized_title', 'normalized_title_year', 'certificate',
+                     'year', 'decade', 'rating', 'votes', 'runtime', 'genre', 'description']
 
-IMPORTANT_GENRE_COLS = [
-    'movie_id', 'title', 'normalized_title', 'normalized_title_year', 'certificate',
-    'year', 'decade', 'rating', 'votes', 'runtime', 'genre', 'description'
-]
+PRUNED_BUDGET_COLS = ['title', 'normalized_title', 'normalized_title_year',
+                      'release_date', 'year', 'decade', 'production_budget',
+                      'domestic_gross', 'worldwide_gross']
 
-IMPORTANT_BUDGET_COLS = [
-    'title', 'normalized_title', 'normalized_title_year',
-    'release_date', 'year', 'decade', 'production_budget',
-    'domestic_gross', 'worldwide_gross'
-]
-
-
+# Ratings Mapping
 RATING_MAP = {
     # Rated G
     "G": "G",
