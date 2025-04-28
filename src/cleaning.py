@@ -185,6 +185,7 @@ def clean_genres_to_csv(
     # organizing and outputting results to CSV
     genres_df = standardize_columns(genres_df, source="genres", column_order=column_order)
     genres_df = prune_columns(genres_df, target_cols=target_column_order, source_name='genres')
+    genres_df = genres_df.sort_values(by="title", ascending=True)
     if export == True: 
         genres_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned genres data to %s", output_path)
