@@ -3,17 +3,25 @@ from datetime import datetime
 import re
 from src.utils.logging import setup_logger
 from src.cleaner_tools import (load_stack_csvs, drop_unused_columns, normalize_title_column, extract_year,
-                               add_normalized_title_year, group_decades, split_genres_list, standardize_columns)
+                               add_normalized_title_year, group_decades, split_genres_list,
+                               standardize_columns, generate_col_order, prune_columns)
 from src.helpers import (GENRE_COLS_TO_DROP, TMDB_COLS_TO_DROP,
     GENRES_RAW_PATH, TMDB_RAW_PATH, BUDGET_RAW_PATH,
-    GENRES_OUTPUT_PATH, TMDB_OUTPUT_PATH, BUDGET_OUTPUT_PATH,
-    TMDB_COL_ORDER, GENRE_COL_ORDER, BUDGET_COL_ORDER, RATING_MAP)
+    GENRES_OUTPUT_PATH, TMDB_OUTPUT_PATH, BUDGET_OUTPUT_PATH, RATING_MAP, IMPORTANT_TMDB_COLS,
+    IMPORTANT_GENRE_COLS, IMPORTANT_BUDGET_COLS)
+
+# instantiating column order
+TMDB_FULL_COL_ORDER = generate_col_order("tmdb")
+GENRE_FULL_COL_ORDER = generate_col_order("genres")
+BUDGET_FULL_COL_ORDER = generate_col_order("budget")
+
 
 def clean_tmdb_to_csv(
     raw_path: str = TMDB_RAW_PATH,
     cols_to_drop: list = TMDB_COLS_TO_DROP,
     output_path: str = TMDB_OUTPUT_PATH,
-    column_order: list = TMDB_COL_ORDER,
+    column_order: list = TMDB_FULL_COL_ORDER,
+    target_column_order: list = IMPORTANT_TMDB_COLS,
     export: bool = True,
 ) -> pd.DataFrame:
     """
@@ -94,6 +102,7 @@ def clean_tmdb_to_csv(
 
     # reorganizing and outputting to CSV
     tmdb_df = standardize_columns(tmdb_df, source="tmdb", column_order=column_order)
+    tmdb_df = prune_columns(tmdb_df, target_cols=target_column_order, source_name='tmdb')
     tmdb_df = tmdb_df.sort_values(by="title", ascending=True)
     if export == True: 
         tmdb_df.to_csv(output_path, index=False)
@@ -105,7 +114,8 @@ def clean_genres_to_csv(
     raw_path: str = GENRES_RAW_PATH,
     cols_to_drop: list = GENRE_COLS_TO_DROP,
     output_path: str = GENRES_OUTPUT_PATH,
-    column_order: list = GENRE_COL_ORDER,
+    column_order: list = GENRE_FULL_COL_ORDER,
+    target_column_order : list = IMPORTANT_GENRE_COLS,
     export: bool = True,
 ):
     """
@@ -190,6 +200,7 @@ def clean_genres_to_csv(
     genres_df = standardize_columns(
         genres_df, source="genres", column_order=column_order
     )
+    genres_df = prune_columns(genres_df, target_cols=target_column_order, source_name='genres')
     if export == True: 
         genres_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned genres data to %s", output_path)
@@ -199,7 +210,8 @@ def clean_genres_to_csv(
 def clean_budgets_to_csv(
     raw_path: str = BUDGET_RAW_PATH,
     output_path: str = BUDGET_OUTPUT_PATH,
-    column_order: list = BUDGET_COL_ORDER,
+    column_order: list = BUDGET_FULL_COL_ORDER,
+    target_column_order: list = IMPORTANT_BUDGET_COLS,
     export: bool = True,
 ) -> pd.DataFrame:
     """
@@ -256,6 +268,8 @@ def clean_budgets_to_csv(
     budgets_df = standardize_columns(
         budgets_df, source="budget", column_order=column_order
     )
+    budgets_df = prune_columns(budgets_df, target_cols=target_column_order, source_name='budget')
+    
     budgets_df = budgets_df.sort_values(by="title", ascending=True)
     if export == True: 
         budgets_df.to_csv(output_path, index=False)
