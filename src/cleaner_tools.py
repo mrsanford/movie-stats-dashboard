@@ -12,7 +12,7 @@ def load_stack_csvs(folder_path: str = GENRES_RAW_PATH):
     into a single DataFrame
     ---
     Args:
-        folder_path (str): Path to the folder containing the raw CSV files
+        folder_path (str): path to the folder containing the raw CSV files
     Returns:
         pd.DataFrame: concatenated DataFrame of all CSV files
     """
@@ -25,23 +25,16 @@ def normalize_title_column(
     df: pd.DataFrame, column: str = "title", new_column: str = "normalized_title"
 ) -> pd.DataFrame:
     """
-    Creates a new column of normalized movie titles (lowercases, removed
-    nonalphanumeric characters, whitespace)
+    Adds a lowercase, alphanumeric-only version of the title for easier matching and merging
     ---
     Args:
-        df (pd.DataFrame): the input DataFrame
-        column (str): column containing original movie titles
-        new_column (str): the name of the new normalized column
+        df (pd.DataFrame): source DataFrame
+        column (str): column containing movie titles
+        new_column (str): output column name
     Returns:
-        pd.DataFrame: DataFrame with the added normalized title column
+        pd.DataFrame: updated DataFrame with normalized titles.
     """
-    df[new_column] = (
-        df[column]
-        .astype(str)
-        .str.lower()
-        .str.replace(r"\W+", "", regex=True)
-        .str.strip()
-    )
+    df[new_column] = (df[column].astype(str).str.lower().str.replace(r"\W+", "", regex=True).str.strip())
     return df
 
 
@@ -58,21 +51,17 @@ def extract_year(
     Returns:
         pd.DataFrame: DataFrame with added 'year' column
     """
-    df[output_column] = pd.to_datetime(df[date_column], errors="coerce").dt.year.astype(
-        "Int64"
-    )
+    df[output_column] = pd.to_datetime(df[date_column], errors="coerce").dt.year.astype("Int64")
     return df
 
 
 def add_normalized_title_year(df: pd.DataFrame, title_col: str, year_col: str = "year"):
+    """
+    Creates normalized_title + year column
+    """
     return df.assign(
-        normalized_title_year=(
-            df[title_col].astype(str).str.strip().str.lower()
-            + "_"
-            + df[year_col].astype(str).str.strip()
-        )
-    )
-
+        normalized_title_year=(df[title_col].astype(str).str.strip().str.lower()
+                + "_" + df[year_col].astype(str).str.strip()))
 
 def drop_unused_columns(df: pd.DataFrame, cols_to_drop: list) -> pd.DataFrame:
     """
@@ -150,12 +139,30 @@ def standardize_columns(
 
 
 def generate_col_order(source: str) -> List[str]:
+    """
+    Generates the target column order based on mappings for a dataset source
+    ---
+    Args:
+        source (str): dataset type key
+    Returns:
+        List[str]: ordered list of column names
+    """
     mapping = COLUMN_MAPPING.get(source, {})
     shared = COLUMN_MAPPING.get("shared", {})
     return list(mapping.values()) + list(shared.values())
 
 
 def prune_columns(df: pd.DataFrame, target_cols: list, source_name: str = "") -> pd.DataFrame:
+    """
+    Prunes DataFrame to only include target columns, logging any missing ones
+    ---
+    Args:
+        df (pd.DataFrame): source DataFrame
+        target_cols (list): columns to retain
+        source_name (str, optional): label for logging purposes
+    Returns:
+        pd.DataFrame: prune DataFrame
+    """
     logger = setup_logger("column_pruner", "merge_datasets")
     missing = set(target_cols) - set(df.columns)
     if missing:
