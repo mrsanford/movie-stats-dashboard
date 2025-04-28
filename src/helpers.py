@@ -89,65 +89,83 @@ COLUMN_MAPPING = {
     "shared": {"decade": "decade"},
 }
 
-TMDB_COL_ORDER = [
-    "id",
-    "movie_id",
-    "title",
-    "normalized_title",
-    "normalized_title_year",
-    "release_date",
-    "year",
-    "decade",
-    "rating",
-    "votes",
-    "popularity",
-    "genre",
-    "status",
-    "runtime",
-    "adult",
-    "budget",
-    "worldwide_gross",
-    "description",
-    "tagline",
-    "keywords",
-    "original_title",
-    "language",
-    "spoken_languages",
-    "production_companies",
-    "production_countries",
+# TMDB_COL_ORDER = [
+#     "id",
+#     "movie_id",
+#     "title",
+#     "normalized_title",
+#     "normalized_title_year",
+#     "release_date",
+#     "year",
+#     "decade",
+#     "rating",
+#     "votes",
+#     "popularity",
+#     "genre",
+#     "status",
+#     "runtime",
+#     "adult",
+#     "budget",
+#     "worldwide_gross",
+#     "description",
+#     "tagline",
+#     "keywords",
+#     "original_title",
+#     "language",
+#     "spoken_languages",
+#     "production_companies",
+#     "production_countries",
+# ]
+
+# GENRE_COL_ORDER = [
+#     "movie_id",
+#     "title",
+#     "normalized_title",
+#     "normalized_title_year",
+#     "year",
+#     "decade",
+#     "certificate",
+#     "runtime",
+#     "genre",
+#     "description",
+#     "rating",
+#     "votes",
+#     "director",
+#     "star",
+#     "total_gross",
+# ]
+
+# BUDGET_COL_ORDER = [
+#     "index",
+#     "title",
+#     "normalized_title",
+#     "normalized_title_year",
+#     "release_date",
+#     "year",
+#     "decade",
+#     "production_budget",
+#     "domestic_gross",
+#     "worldwide_gross",
+# ]
+
+IMPORTANT_TMDB_COLS = [
+    'movie_id', 'title', 'normalized_title', 'normalized_title_year',
+    'release_date', 'year', 'decade', 'rating', 'votes', 'runtime',
+    'genre', 'budget', 'worldwide_gross', 'description', 'production_countries'
+]
+
+IMPORTANT_GENRE_COLS = [
+    'movie_id', 'title', 'normalized_title', 'normalized_title_year', 'certificate',
+    'year', 'decade', 'rating', 'votes', 'runtime', 'genre', 'description'
+]
+
+IMPORTANT_BUDGET_COLS = [
+    'title', 'normalized_title', 'normalized_title_year',
+    'release_date', 'year', 'decade', 'production_budget',
+    'domestic_gross', 'worldwide_gross'
 ]
 
 
-GENRE_COL_ORDER = [
-    "movie_id",
-    "title",
-    "normalized_title",
-    "normalized_title_year",
-    "year",
-    "decade",
-    "certificate",
-    "runtime",
-    "genre",
-    "description",
-    "rating",
-    "votes",
-    "director",
-    "star",
-    "total_gross",
-]
-
-BUDGET_COL_ORDER = [
-    "index",
-    "title",
-    "normalized_title",
-    "normalized_title_year",
-    "release_date",
-    "year",
-    "decade",
-    "production_budget",
-    "domestic_gross",
-    "worldwide_gross",
-]
 
 RATING_MAP = {
     # Rated G
