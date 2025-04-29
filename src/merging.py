@@ -7,14 +7,14 @@ from src.utils.logging import setup_logger
 # drop the null values first in tmdb, genres, and budgets
 def drop_null_in_valid(df: pd.DataFrame, critical_cols: List[str]) -> pd.DataFrame:
     """
-    Drops rows where any critical column is NaN, and rows where more than
-    80% of non-critical columns are NaN.
+    Drops rows where any critical column value equals NaN, and rows where more
+    than 80% of non-critical columns are NaN. 
     ---
     Args:
-        df (pd.DataFrame): Input DataFrame.
-        critical_cols (List[str]): List of critical columns to check.
+        df (pd.DataFrame): input DataFrame
+        critical_cols (List[str]): list of critical columns to check
     Returns:
-        pd.DataFrame: Cleaned DataFrame with invalid rows removed.
+        pd.DataFrame: cleaned DataFrame with invalid rows removed
     """
     df = df.dropna(subset=[col for col in critical_cols if col in df.columns])
     non_critical_cols = [col for col in df.columns if col not in critical_cols]
@@ -26,6 +26,15 @@ def drop_null_in_valid(df: pd.DataFrame, critical_cols: List[str]) -> pd.DataFra
 
 ## merging tmdb and genres on movie_ids
 def merge_movie_ids(df1: pd.DataFrame, df2: pd.DataFrame, type: str = "left") -> pd.DataFrame:
+    """
+    Merges the TMDV and genres DataFrames based on movie_id using target join 'type'
+    ---
+    Args:
+        df1 (pd.DataFrame), df2 (pd.DataFrame): the target dataframe
+        type (str): the type of join
+    Returns:
+        pd.DataFrame merged on 'movie_id'
+    """
     logger = setup_logger('movie_id_merger', 'merge_datasets')
     if 'movie_id' not in df1.columns or 'movie_id' not in df2.columns:
         raise ValueError("Both DataFrames must contain a 'movie_id' column.")
@@ -34,12 +43,14 @@ def merge_movie_ids(df1: pd.DataFrame, df2: pd.DataFrame, type: str = "left") ->
     return merged_df
 
 
-## merging budgets on normalized_title + year with tmdb and then assigning movie ids
-### if any go unmatched with tmdb, do the same to genres and assign movie ids
-### if any are still unmatched, drop the budget rows
 def assign_budget_movie_id(budgets_df: pd.DataFrame,
                            tmdb_df: pd.DataFrame,
                            genres_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Matches budgets to movies by merging on normalized_title + year
+    First tries to match with TMDB, then falls back on the genres dataset
+    Any remaining unmatched budget rows are dropped
+    """
     logger = setup_logger("budget_merger", "merge_datasets")
     # merging with TMDB on normalized_title + year
     merged = budgets_df.merge(tmdb_df[['normalized_title', 'year', 'movie_id']],
@@ -63,6 +74,11 @@ def assign_budget_movie_id(budgets_df: pd.DataFrame,
 
 
 def clean_merged_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleans up duplicated columns (resolving _x and _y) after the merge
+    Prefers values from _x columns but falls back to _y if needed
+    Removes the suffixed columns and replaces them with the single clean column
+    """
     new_df = df.copy()
     for col in new_df.columns:
         if col.endswith('_x'):
@@ -77,7 +93,7 @@ def clean_merged_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def fix_genre_strings(df: pd.DataFrame, genre_col: str = 'genre') -> pd.DataFrame:
     """
-    Converts genre column from stringified lists to actual Python lists.
+    Converts genre column values from string representations to actual Python lists
     """
     df = df.copy()
     df[genre_col] = df[genre_col].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
@@ -86,7 +102,7 @@ def fix_genre_strings(df: pd.DataFrame, genre_col: str = 'genre') -> pd.DataFram
 
 def create_genre_table(df: pd.DataFrame, genre_col: str = 'genre') -> pd.DataFrame:
     """
-    Creates a genre table assigning each unique genre an ID
+    Builds a genre lookup table from all unique genre names in the dataset
     """
     # Flatten all genres into a single list
     all_genres = set(genre for sublist in df[genre_col] for genre in sublist)
@@ -94,14 +110,18 @@ def create_genre_table(df: pd.DataFrame, genre_col: str = 'genre') -> pd.DataFra
     # Create genre table
     genre_table = pd.DataFrame({
         'genre_id': range(1, len(all_genres) + 1),
-        'genre_name': sorted(all_genres)  # Sort alphabetically if you want
+        'genre_name': sorted(all_genres)
     })
     return genre_table
 
 
 def create_movie_genre_links(df: pd.DataFrame, genre_table: pd.DataFrame, genre_col: str = 'genre') -> pd.DataFrame:
     """
-    Creates a linking table between movies and genres
+    Explodes the genres list in the movie DataFrame -> each row is single movie-genre pair
+    Merges with the genre lookup table to get the corresponding genre_id
+    ---
+    Returns:
+        pd.DataFrame of two columns with movie_id and genre_id
     """
     # explodes the genres first
     exploded = df[['movie_id', genre_col]].explode(genre_col)
