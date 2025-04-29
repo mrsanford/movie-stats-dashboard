@@ -1,4 +1,5 @@
 import os
+from src.cleaner_tools import generate_col_order
 
 # Root Paths
 PATH_DATA = "data"
@@ -34,7 +35,7 @@ GENRE_COLS_TO_DROP = [
 ]
 TMDB_COLS_TO_DROP = ["backdrop_path", "homepage", "poster_path"]
 
-# Target Column Order
+# Target Column Mapping and Declaring the Order
 COLUMN_MAPPING = {
     "tmdb": {
         "id": "id",
@@ -89,6 +90,12 @@ COLUMN_MAPPING = {
     },
     "shared": {"decade": "decade"},
 }
+
+# instantiating column order
+TMDB_FULL_COL_ORDER = generate_col_order("tmdb")
+GENRE_FULL_COL_ORDER = generate_col_order("genres")
+BUDGET_FULL_COL_ORDER = generate_col_order("budget")
+
 
 # Pruned Analysis Columns
 PRUNED_TMDB_COLS = ['movie_id', 'title', 'normalized_title', 'normalized_title_year',
