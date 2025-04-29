@@ -102,6 +102,11 @@ PRUNED_BUDGET_COLS = ['title', 'normalized_title', 'normalized_title_year',
                       'release_date', 'year', 'decade', 'production_budget',
                       'domestic_gross', 'worldwide_gross']
 
+# Critical Columns (for Merge)
+TMDB_CRIT_COLS = ['movie_id', 'title', 'normalized_title', 'year','decade']
+GENRES_CRIT_COLS = ['movie_id', 'title', 'normalized_title', 'year','decade']
+BUDGET_CRIT_COLS = ['title', 'normalized_title', 'year', 'decade']
+
 # Ratings Mapping
 RATING_MAP = {
     # Rated G

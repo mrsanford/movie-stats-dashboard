@@ -3,6 +3,7 @@ from src.utils.logging import setup_logger
 import pandas as pd
 from typing import List
 import glob
+import ast
 import os
 
 
@@ -88,13 +89,15 @@ def split_genres_list(df: pd.DataFrame, genre_column='genre') -> List[str]:
         pd.DataFrame: same DataFrame with genre column converted to List[str]
     """
     df = df.copy()
-    df = df.dropna(subset=[genre_column])
-    # applying string splitting and cleanup
-    df[genre_column] = (
-        df[genre_column]
-        .str.split(",\s*")
-        .apply(lambda genres: [g.strip().title() for g in genres])
-    )
+    if genre_column not in df.columns:
+        raise ValueError(f"'{genre_column}' column not found in dataframe.")
+    df[genre_column] = df[genre_column].fillna('')
+    def safe_split(genres):
+        if isinstance(genres, str) and genres.strip() != "":
+            return [g.strip().title() for g in genres.split(",") if g.strip()]
+        else:
+            return []
+    df[genre_column] = df[genre_column].apply(safe_split)
     return df
 
 
