@@ -1,9 +1,4 @@
-from src.helpers import (
-    PROCESSED_PATH,
-    TMDB_OUTPUT_PATH,
-    GENRES_OUTPUT_PATH,
-    BUDGET_OUTPUT_PATH,
-)
+from src.helpers import PROCESSED_PATH
 import csv
 import os
 import inspect
@@ -115,138 +110,84 @@ class MovieDB(BaseDB):
         super().__init__(self.PATH, create=True)
         if not self._existed:
             self._create_tables()
-            self.load_tmdb_data()
-            self.load_genre_data()
-            self.load_budget_data()
 
     def _create_tables(self) -> None:
-        sql = """
-            CREATE TABLE IF NOT EXISTS tMovie (
+        self.run_action("""
+            CREATE TABLE IF NOT EXISTS tMovie(
                 movie_id TEXT PRIMARY KEY,
                 title TEXT,
-                year INTEGER CHECK (year BETWEEN 1850 AND 2025),
+                normalized_title TEXT,
+                release_date TEXT,
+                year INTEGER,
                 decade TEXT,
                 certificate TEXT,
-                runtime INTEGER,
                 rating REAL,
                 votes INTEGER,
-                imdb_id TEXT,
-                language TEXT,
+                runtime INTEGER,
                 description TEXT, 
-                tagline TEXT,
-                popularity_score REAL
-            );"""
-        self.run_action(sql)
-
-        sql = """
+                production_countries TEXT
+            );""")
+        self.run_action("""
+            CREATE TABLE IF NOT EXISTS tGenre(
+                genre_id INTEGER PRIMARY KEY,
+                genre_name TEXT
+            );""")
+        self.run_action("""
+            CREATE TABLE IF NOT EXISTS tMovieGenre(
+                movie_id TEXT NOT NULL,
+                genre_id INTEGER NOT NULL,
+                FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id),
+                FOREIGN KEY (genre_id) REFERENCES tGenre(genre_id)
+            );""")
+        self.run_action("""
             CREATE TABLE IF NOT EXISTS tBudget (
                 budget_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                movie_id TEXT,
-                release_date TEXT,
-                production_budget_usd INTEGER,
-                domestic_gross_usd INTEGER,
-                worldwide_gross_usd INTEGER,
+                movie_id TEXT NOT NULL,
+                production_budget INTEGER,
+                domestic_gross INTEGER,
+                worldwide_gross INTEGER,
                 FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id)
-            );"""
-        self.run_action(sql)
-
-        # sql = """
-        # CREATE TABLE IF NOT EXISTS tGenre (
-        #     genre_id INTEGER PRIMARY KEY,
-        #     genre_name TEXT
-        # );"""
-        # self.run_action(sql)
-
-        # sql = """
-        # CREATE TABLE IF NOT EXISTS tMovieGenre (
-        #     movie_id TEXT NOT NULL,
-        #     genre_id INTEGER NOT NULL,
-        #     FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id),
-        #     FOREIGN KEY (genre_id) REFERENCES tGenre(genre_id)
-        # );"""
-        # self.run_action(sql)
-
-        # sql = """
-        # CREATE TABLE IF NOT EXISTS tPeople (
-        #     person_id INTEGER PRIMARY KEY,
-        #     person_name TEXT
-        # );"""
-        # self.run_action(sql)
-
-        # sql = """
-        # CREATE TABLE IF NOT EXISTS tMoviePeople (
-        #     movie_id TEXT NOT NULL,
-        #     person_id INTEGER NOT NULL,
-        #     person_role TEXT,
-        #     FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id),
-        #     FOREIGN KEY (person_id) REFERENCES tPeople(person_id)
-        # );"""
-        # self.run_action(sql)
+            );""")
+        self.run_action("CREATE INDEX IF NOT EXISTS idx_budget_movie_id ON tBudget(movie_id);")
+        self.run_action("CREATE INDEX IF NOT EXISTS idx_moviegenre_movie_id ON tMovieGenre(movie_id);")
+        self.run_action("CREATE INDEX IF NOT EXISTS idx_moviegenre_genre_id ON tMovieGenre(genre_id);")
         return
-
-    def load_tmdb_data(self) -> None:
-        tmdb_data = pd.read_csv(TMDB_OUTPUT_PATH)
-
-        ## STANDARDIZE COLUMN NAMES HERE ##
-        sql = """
-            INSERT INTO tMovie
-            VALUES
-        ;"""
+    
+    def load_from_dataframes(
+            self,
+            movies_df: pd.DataFrame, budgets_df: pd.DataFrame,
+            genre_table: pd.DataFrame, movie_genre_links: pd.DataFrame
+    ) -> None:
+        """
+        Loads cleaned and merged DataFrames directory into the database
+        """
         self._connect()
         try:
-            for i, row in enumerate(tmdb_data.to_dict(orient="records")):
-                try:
-                    self.run_action(sql, params=row, commit=False, keep_open=True)
-                except Exception as e:
-                    raise type(e)(f"Error on row {i}") from e
+            # movie cols
+            movie_cols = [
+            'movie_id', 'title', 'normalized_title',
+            'release_date', 'year', 'decade', 'certificate', 'rating', 'votes',
+            'runtime', 'description', 'production_countries']
+            movie_sql = f"INSERT OR IGNORE INTO tMovie VALUES ({','.join(['?'] * len(movie_cols))})"
+            for row in movies_df[movie_cols].itertuples(index=False, name=None):
+                self._curs.execute(movie_sql, row)
+            # budget cols
+            budget_cols = ['movie_id', 'production_budget', 'domestic_gross', 'worldwide_gross']
+            budget_sql = """
+            INSERT OR IGNORE INTO tBudget (
+                movie_id, production_budget, domestic_gross, worldwide_gross
+            ) VALUES (?, ?, ?, ?)
+            """
+            for row in budgets_df[budget_cols].itertuples(index=False, name=None):
+                self._curs.execute(budget_sql, row)\
+            # genre cols   
+            genre_sql = "INSERT OR IGNORE INTO tGenre (genre_id, genre_name) VALUES (?, ?)"
+            for row in genre_table[['genre_id', 'genre_name']].itertuples(index=False, name=None):
+                self._curs.execute(genre_sql, row)
+            # movie-genre cols
+            link_sql = "INSERT OR IGNORE INTO tMovieGenre (movie_id, genre_id) VALUES (?, ?)"
+            for row in movie_genre_links[['movie_id', 'genre_id']].itertuples(index=False, name=None):
+                self._curs.execute(link_sql, row)
             self._conn.commit()
-        except Exception as e:
-            self._conn.rollback()
-            raise e
         finally:
             self._close()
-        return None
-
-    def load_genre_data(self) -> None:
-        genre_data = pd.read_csv(GENRES_OUTPUT_PATH)
-        ## STANDARDIZE COLUMN NAMES HERE ##
-        sql = """
-            INSERT INTO tMovie
-            VALUES
-        ;"""
-        self._connect()
-        try:
-            for i, row in enumerate(genre_data.to_dict(orient="records")):
-                try:
-                    self.run_action(sql, params=row, commit=False, keep_open=True)
-                except Exception as e:
-                    raise type(e)(f"Error on row {i}") from e
-            self._conn.commit()
-        except Exception as e:
-            self._conn.rollback()
-            raise e
-        finally:
-            self._close()
-        return None
-
-    def load_budget_data(self) -> None:
-        budget_data = pd.read_csv(BUDGET_OUTPUT_PATH)
-        ## STANDARDIZE COLUMN NAMES HERE ##
-        sql = """
-            INSERT INTO tMovie
-            VALUES
-        ;"""
-        self._connect()
-        try:
-            for i, row in enumerate(budget_data.to_dict(orient="records")):
-                try:
-                    self.run_action(sql, params=row, commit=False, keep_open=True)
-                except Exception as e:
-                    raise type(e)(f"Error on row {i}") from e
-            self._conn.commit()
-        except Exception as e:
-            self._conn.rollback()
-            raise e
-        finally:
-            self._close()
-        return None
