@@ -2,8 +2,8 @@ import pandas as pd
 import ast
 from typing import List
 from src.utils.logging import setup_logger
-from src.helpers import TMDB_CRIT_COLS, GENRES_CRIT_COLS, BUDGET_CRIT_COLS
-from src.cleaning import clean_tmdb_to_csv, clean_genres_to_csv, clean_budgets_to_csv
+from src.utils.helpers import TMDB_CRIT_COLS, GENRES_CRIT_COLS, BUDGET_CRIT_COLS
+from src.processing.cleaning import clean_tmdb_to_csv, clean_genres_to_csv, clean_budgets_to_csv
 
 
 # drop the null values first in tmdb, genres, and budgets

@@ -1,4 +1,4 @@
-from src.helpers import PROCESSED_PATH
+from src.utils.helpers import PROCESSED_PATH
 from src.utils.logging import setup_logger
 import os
 import sqlite3

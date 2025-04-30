@@ -1,7 +1,7 @@
 import os
 import glob
 import logging
-from src.helpers import LOGS_DATA
+from src.utils.helpers import LOGS_DATA
 
 
 def setup_logger(name: str, log_file: str, level=logging.INFO):

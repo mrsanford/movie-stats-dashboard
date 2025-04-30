@@ -1,4 +1,4 @@
-from src.helpers import GENRES_RAW_PATH, COLUMN_MAPPING
+from src.utils.helpers import GENRES_RAW_PATH, COLUMN_MAPPING
 from src.utils.logging import setup_logger
 import pandas as pd
 from typing import List
