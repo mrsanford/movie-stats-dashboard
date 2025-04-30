@@ -1,14 +1,9 @@
 from src.helpers import PROCESSED_PATH
-import csv
+from src.utils.logging import setup_logger
 import os
-import inspect
-import warnings
 import sqlite3
-from glob import glob
 import pandas as pd
 import numpy as np
-from traceback import print_exc as pe
-from datetime import datetime
 
 
 sqlite3.register_adapter(np.int64, lambda x: int(x))
@@ -107,11 +102,24 @@ class MovieDB(BaseDB):
     PATH = FOLDER + DB_NAME
 
     def __init__(self, path: str = PATH, create: bool = False):
+        """
+        Initializing the MovieDB class and optionally creating schema if not previously existing
+        """
+        self.logger = setup_logger('MovieDB', 'database')
         super().__init__(self.PATH, create=True)
         if not self._existed:
+            self.logger.info('Database not found. Creating schema')
             self._create_tables()
+        else:
+            self.logger.info('Database already exists. Using existing schema')
 
     def _create_tables(self) -> None:
+        """
+        Creates tables and indexes necessary for MoVIZ
+        """
+        self.logger.info('Creating tables')
+
+        # tMovie Table
         self.run_action("""
             CREATE TABLE IF NOT EXISTS tMovie(
                 movie_id TEXT PRIMARY KEY,
@@ -127,11 +135,13 @@ class MovieDB(BaseDB):
                 description TEXT, 
                 production_countries TEXT
             );""")
+        # tGenre Table
         self.run_action("""
             CREATE TABLE IF NOT EXISTS tGenre(
                 genre_id INTEGER PRIMARY KEY,
                 genre_name TEXT
             );""")
+        # tMovieGenre Table
         self.run_action("""
             CREATE TABLE IF NOT EXISTS tMovieGenre(
                 movie_id TEXT NOT NULL,
@@ -139,6 +149,7 @@ class MovieDB(BaseDB):
                 FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id),
                 FOREIGN KEY (genre_id) REFERENCES tGenre(genre_id)
             );""")
+        # tBudget Table
         self.run_action("""
             CREATE TABLE IF NOT EXISTS tBudget (
                 budget_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -148,9 +159,11 @@ class MovieDB(BaseDB):
                 worldwide_gross INTEGER,
                 FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id)
             );""")
+        # Creating additional indices for faster queries
         self.run_action("CREATE INDEX IF NOT EXISTS idx_budget_movie_id ON tBudget(movie_id);")
         self.run_action("CREATE INDEX IF NOT EXISTS idx_moviegenre_movie_id ON tMovieGenre(movie_id);")
         self.run_action("CREATE INDEX IF NOT EXISTS idx_moviegenre_genre_id ON tMovieGenre(genre_id);")
+        self.logger.info('Tables and indexes successfully created')
         return
     
     def load_from_dataframes(
@@ -159,19 +172,28 @@ class MovieDB(BaseDB):
             genre_table: pd.DataFrame, movie_genre_links: pd.DataFrame
     ) -> None:
         """
-        Loads cleaned and merged DataFrames directory into the database
+        Loads cleaned and merged DataFrames directory into SQLite database
+        ---
+        Args:
+            movies_df (pd.DataFrame): main movie metadata table
+            budgets_df (pd.DataFrame): budgets and gross earnings table
+            genre_table (pd.DataFrame): genre lookup table
+            movie_genre_links (pd.DataFrame): pivot table linking movies and genres
         """
+        self.logger.info('Beginning data insertion into MoVIZ database')
         self._connect()
         try:
-            # movie cols
+            # Inserting into tMovies
             movie_cols = [
-            'movie_id', 'title', 'normalized_title',
-            'release_date', 'year', 'decade', 'certificate', 'rating', 'votes',
+            'movie_id', 'title', 'normalized_title', 'release_date',
+            'year', 'decade', 'certificate', 'rating', 'votes',
             'runtime', 'description', 'production_countries']
             movie_sql = f"INSERT OR IGNORE INTO tMovie VALUES ({','.join(['?'] * len(movie_cols))})"
             for row in movies_df[movie_cols].itertuples(index=False, name=None):
                 self._curs.execute(movie_sql, row)
-            # budget cols
+                self.logger.info(f"Inserted {len(movies_df)} rows into tMovie")
+
+            # Inserting into tBudgets
             budget_cols = ['movie_id', 'production_budget', 'domestic_gross', 'worldwide_gross']
             budget_sql = """
             INSERT OR IGNORE INTO tBudget (
@@ -179,15 +201,27 @@ class MovieDB(BaseDB):
             ) VALUES (?, ?, ?, ?)
             """
             for row in budgets_df[budget_cols].itertuples(index=False, name=None):
-                self._curs.execute(budget_sql, row)\
-            # genre cols   
+                self._curs.execute(budget_sql, row)
+            self.logger.info(f"Inserted {len(budgets_df)} rows into tBudget")
+
+            # Inserting into tGenre  
             genre_sql = "INSERT OR IGNORE INTO tGenre (genre_id, genre_name) VALUES (?, ?)"
             for row in genre_table[['genre_id', 'genre_name']].itertuples(index=False, name=None):
                 self._curs.execute(genre_sql, row)
-            # movie-genre cols
+            self.logger.info(f"Inserted {len(genre_table)} rows into tGenre")
+
+            # Inserting into tMovieGenre
             link_sql = "INSERT OR IGNORE INTO tMovieGenre (movie_id, genre_id) VALUES (?, ?)"
             for row in movie_genre_links[['movie_id', 'genre_id']].itertuples(index=False, name=None):
                 self._curs.execute(link_sql, row)
+            self.logger.info(f"Inserted {len(movie_genre_links)} rows into tMovieGenre")
+
             self._conn.commit()
+            self.logger.info('All data successfully committed')
+        except Exception as e:
+            self.logger.error('Rolling back. Error occured during insertion')
+            self._conn.rollback()
+            raise e
         finally:
             self._close()
+            self.logger.info('Database connection closed')
