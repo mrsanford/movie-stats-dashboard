@@ -25,7 +25,7 @@ KAGGLE_TMDB = "asaniczka/tmdb-movies-dataset-2023-930k-movies"
 KAGGLE_IMDB = "rajugc/imdb-movies-dataset-based-on-genre"
 
 # Movie Database Path
-MOVIZ_DB_PATH = os.path.joi(PROCESSED_PATH, 'moviz_db.sqlite')
+MOVIZ_DB_PATH = os.path.join(PROCESSED_PATH, 'moviz_db.sqlite')
 
 # Columns to Drop
 GENRE_COLS_TO_DROP = [
