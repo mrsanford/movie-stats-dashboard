@@ -4,6 +4,7 @@ import pandas as pd
 
 MOVIE_DB_PATH = 'data/processedmovies.sqlite'
 
+
 class MoVIZ(BaseDB):
     def __init__(self):
         super().__init__(path=MOVIE_DB_PATH, create=True)
