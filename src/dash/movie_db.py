@@ -125,6 +125,8 @@ class MoVIZ(BaseDB):
         JOIN tGenre g ON mg.genre_id = g.genre_id
         {"WHERE " + where_clause if where_clause else ""}
         """
+        print("SQL query being run:\n", sql)
+        print("With parameters:\n", params)
         return self.run_query(sql, params)
 
     def get_all_data(self) -> pd.DataFrame:

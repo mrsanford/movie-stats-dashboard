@@ -81,7 +81,7 @@ def create_layout(app: Dash):
 def generate_filter_widgets(selected, user_filters):
     if not selected:
         return []
-    df = MoVIZ().get_filtered_data()
+    df = MoVIZ().get_filtered_data(**(user_filters or {}))
     widgets = []
 
     if "certificate" in selected:
@@ -111,7 +111,7 @@ def generate_filter_widgets(selected, user_filters):
             slider = dcc.RangeSlider(
                 id={"type": "filter-slider", "index": col},
                 min=min_val, max=max_val, step=1,
-                value=user_val if user_val else [min_val, max_val],
+                value=user_val if user_val is not None else [min_val, max_val],
                 tooltip={"placement": "bottom", "always_visible": True})
             widgets.append(html.Div([html.Label(f"{col.replace('_', ' ').title()} Range"), slider]))
         else:
@@ -134,16 +134,30 @@ def generate_filter_widgets(selected, user_filters):
     Input("clear-filters", "n_clicks"),
     State("char-selector", "value"),
     State({"type": "filter-slider", "index": ALL}, "value"),
-    State({"type": "filter-slider", "index": ALL}, "index"),
+    State({"type": "filter-slider", "index": ALL}, "id"),
     State({"type": "filter-dropdown", "index": ALL}, "value"),
-    State({"type": "filter-dropdown", "index": ALL}, "index")
+    State({"type": "filter-dropdown", "index": ALL}, "id"),
 )
-def store_user_filters(apply_clicks, clear_clicks, selected, slider_vals, slider_keys, drop_vals, drop_keys):
+def store_user_filters(apply_clicks, clear_clicks, selected,
+                       slider_vals, slider_ids, drop_vals, drop_ids):
+    # if clear filters clicked, resets all filters
     if ctx.triggered_id == "clear-filters":
         return {}, None, None, None
-
+    
+    # extracting column keys from component ids
+    slider_keys = [s["index"] for s in slider_ids]
+    drop_keys = [d["index"] for d in drop_ids]
+    # combining slider and dropdown filters into dictionary
     temp_filters = {key: val for key, val in zip(slider_keys + drop_keys, slider_vals + drop_vals)}
+    
+    # print checks
+    print("slider_keys:", slider_keys)
+    print("slider_vals:", slider_vals)
+    print("drop_keys:", drop_keys)
+    print("drop_vals:", drop_vals)
+    print("temp_filters:", temp_filters)
 
+    # frontend column names mapped to backend column names
     filter_map = {
         "rating": "ratings_range",
         "worldwide_gross": "revenue_range",
@@ -152,23 +166,24 @@ def store_user_filters(apply_clicks, clear_clicks, selected, slider_vals, slider
         "genre_name": "genres",
         "certificate": "certificates"
     }
+    
+    filters = {filter_map[col]: temp_filters[col]
+        for col in temp_filters if col in filter_map}
+    # db = MoVIZ()
+    # df = db.get_filtered_data()
 
-    db = MoVIZ()
-    df = db.get_filtered_data()
-
-    default_values = {
-        "ratings_range": [df["rating"].min(), df["rating"].max()],
-        "revenue_range": [df["worldwide_gross"].min(), df["worldwide_gross"].max()],
-        "budget_range": [df["production_budget"].min(), df["production_budget"].max()],
-        "decades": sorted(df["decade"].unique()),
-        "genres": sorted(df["genre_name"].unique()),
-        "certificates": sorted(df["certificate"].dropna().unique())
-    }
-
-    filters = {
-        key: temp_filters.get(orig_key, default_values[key])
-        for orig_key, key in filter_map.items()
-    }
+    # default_values = {
+    #     "ratings_range": [df["rating"].min(), df["rating"].max()],
+    #     "revenue_range": [df["worldwide_gross"].min(), df["worldwide_gross"].max()],
+    #     "budget_range": [df["production_budget"].min(), df["production_budget"].max()],
+    #     "decades": sorted(df["decade"].unique()),
+    #     "genres": sorted(df["genre_name"].unique()),
+    #     "certificates": sorted(df["certificate"].dropna().unique())}
+    
+    # filters = {
+    #     key: temp_filters[orig_key]
+    #     for orig_key, key in filter_map.items()
+    #     if orig_key in temp_filters}
     return filters, no_update, no_update, no_update
 
 
@@ -198,6 +213,8 @@ def display_filter_summary(filters):
 )
 def filter_data(filters):
     db = MoVIZ()
+    print("Applied filters:", filters)
+    print("First few rows:\n", db.get_filtered_data(**filters).head())
     return db.get_filtered_data(**filters).to_dict("records") if filters else db.get_filtered_data().to_dict("records")
 
 
