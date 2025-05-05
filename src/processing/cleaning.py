@@ -2,15 +2,39 @@ import pandas as pd
 from datetime import datetime
 import re
 from src.utils.logging import setup_logger
-from src.processing.cleaner_tools import (load_stack_csvs, drop_unused_columns, normalize_title_column, extract_year,
-                               add_normalized_title_year, group_decades, generate_col_order, split_genres_list,
-                               standardize_columns, prune_columns)
+from src.processing.cleaner_tools import (
+    load_stack_csvs,
+    drop_unused_columns,
+    normalize_title_column,
+    extract_year,
+    add_normalized_title_year,
+    group_decades,
+    generate_col_order,
+    split_genres_list,
+    standardize_columns,
+    prune_columns,
+)
+
 # Path Constants
-from src.utils.helpers import (GENRES_RAW_PATH, TMDB_RAW_PATH, BUDGET_RAW_PATH,
-    GENRES_OUTPUT_PATH, TMDB_OUTPUT_PATH, BUDGET_OUTPUT_PATH)
+from src.utils.helpers import (
+    GENRES_RAW_PATH,
+    TMDB_RAW_PATH,
+    BUDGET_RAW_PATH,
+    GENRES_OUTPUT_PATH,
+    TMDB_OUTPUT_PATH,
+    BUDGET_OUTPUT_PATH,
+)
+
 # Column Constants
-from src.utils.helpers import (RATING_MAP, GENRE_COLS_TO_DROP, TMDB_COLS_TO_DROP,
-                         PRUNED_GENRE_COLS, PRUNED_TMDB_COLS, PRUNED_BUDGET_COLS)
+from src.utils.helpers import (
+    RATING_MAP,
+    GENRE_COLS_TO_DROP,
+    TMDB_COLS_TO_DROP,
+    PRUNED_GENRE_COLS,
+    PRUNED_TMDB_COLS,
+    PRUNED_BUDGET_COLS,
+)
+
 # Column Order
 TMDB_FULL_COL_ORDER = generate_col_order("tmdb")
 GENRE_FULL_COL_ORDER = generate_col_order("genres")
@@ -47,10 +71,14 @@ def clean_tmdb_to_csv(
     tmdb_df = drop_unused_columns(tmdb_df, cols_to_drop)
     logger.info("Dropped unused columns.")
     tmdb_df = tmdb_df[tmdb_df["title"].notna() & (tmdb_df["title"].str.strip() != "")]
-    logger.info("Removed rows with missing or empty 'title'. Remaining: %d", len(tmdb_df))
+    logger.info(
+        "Removed rows with missing or empty 'title'. Remaining: %d", len(tmdb_df)
+    )
 
     # normalizing titles
-    tmdb_df = normalize_title_column(tmdb_df, column="title", new_column="normalized_title")
+    tmdb_df = normalize_title_column(
+        tmdb_df, column="title", new_column="normalized_title"
+    )
     logger.info("Normalized titles.")
 
     # extracting the year
@@ -63,7 +91,9 @@ def clean_tmdb_to_csv(
     logger.info("Created 'normalized_title_year' column for fallback merging.")
 
     # filtering TMDb for invalid/null data
-    tmdb_df = tmdb_df[~tmdb_df[["runtime", "revenue", "budget"]].fillna(0).eq(0).all(axis=1)]
+    tmdb_df = tmdb_df[
+        ~tmdb_df[["runtime", "revenue", "budget"]].fillna(0).eq(0).all(axis=1)
+    ]
     logger.info("Filtered rows with all-zero or null runtime, revenue, and budget.")
 
     # filtering TMDb for only 'Released' movies
@@ -92,14 +122,16 @@ def clean_tmdb_to_csv(
     logger.info("Grouped data by decade.")
 
     # splitting and normalizing 'genres' columns
-    tmdb_df = split_genres_list(tmdb_df, genre_column='genres')
+    tmdb_df = split_genres_list(tmdb_df, genre_column="genres")
     logger.info("Split 'genres' into lists.")
 
     # reorganizing and outputting to CSV
     tmdb_df = standardize_columns(tmdb_df, source="tmdb", column_order=column_order)
-    tmdb_df = prune_columns(tmdb_df, target_cols=target_column_order, source_name='tmdb')
+    tmdb_df = prune_columns(
+        tmdb_df, target_cols=target_column_order, source_name="tmdb"
+    )
     tmdb_df = tmdb_df.sort_values(by="title", ascending=True)
-    if export == True: 
+    if export == True:
         tmdb_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned TMDb data to %s", output_path)
     return tmdb_df
@@ -110,7 +142,7 @@ def clean_genres_to_csv(
     cols_to_drop: list = GENRE_COLS_TO_DROP,
     output_path: str = GENRES_OUTPUT_PATH,
     column_order: list = GENRE_FULL_COL_ORDER,
-    target_column_order : list = PRUNED_GENRE_COLS,
+    target_column_order: list = PRUNED_GENRE_COLS,
     export: bool = True,
 ):
     """
@@ -135,16 +167,28 @@ def clean_genres_to_csv(
     logger.info("Loaded genre CSVs. Total rows: %d", len(genres_df))
 
     # normalizing genre movie names
-    genres_df = normalize_title_column(genres_df, column="movie_name", new_column="normalized_movie_name")
+    genres_df = normalize_title_column(
+        genres_df, column="movie_name", new_column="normalized_movie_name"
+    )
     logger.info("Normalized movie names.")
 
     # cleaning 'star' column into lists
     if "star" in genres_df.columns:
-        genres_df["star"] = genres_df["star"].fillna("").apply(
-            lambda x: [name.strip().strip("'") for name in re.sub(r"^\[|\]$", "", x.strip()).split(", \\n") if name.strip()]
+        genres_df["star"] = (
+            genres_df["star"]
+            .fillna("")
+            .apply(
+                lambda x: [
+                    name.strip().strip("'")
+                    for name in re.sub(r"^\[|\]$", "", x.strip()).split(", \\n")
+                    if name.strip()
+                ]
+            )
         )
-        logger.info("Corrected 'star' column from stringified list to clean list of names.")
-        
+        logger.info(
+            "Corrected 'star' column from stringified list to clean list of names."
+        )
+
     # dropping duplicates by movie_id (first) and normalized title + year as a fallback
     genres_df = genres_df.drop_duplicates(subset="movie_id")
     genres_df = genres_df.drop_duplicates(subset=["normalized_movie_name", "year"])
@@ -176,18 +220,24 @@ def clean_genres_to_csv(
     # dropping outliers and videogame rating values and mapping ratings to MPA's US Rating System
     drop_ratings = {"A", "T", "12", "7"}
     genres_df = genres_df.loc[~genres_df["certificate"].isin(drop_ratings)].copy()
-    genres_df["certificate"] = (genres_df["certificate"].map(RATING_MAP).fillna("Not Rated"))
+    genres_df["certificate"] = (
+        genres_df["certificate"].map(RATING_MAP).fillna("Not Rated")
+    )
     logger.info("Dropped unneccesary ratings and remapped certificate ratings.")
 
     # splitting 'genres' into lists
-    genres_df = split_genres_list(genres_df, genre_column='genre')
+    genres_df = split_genres_list(genres_df, genre_column="genre")
     logger.info("Splitting 'genre' into lists.")
 
     # organizing and outputting results to CSV
-    genres_df = standardize_columns(genres_df, source="genres", column_order=column_order)
-    genres_df = prune_columns(genres_df, target_cols=target_column_order, source_name='genres')
+    genres_df = standardize_columns(
+        genres_df, source="genres", column_order=column_order
+    )
+    genres_df = prune_columns(
+        genres_df, target_cols=target_column_order, source_name="genres"
+    )
     genres_df = genres_df.sort_values(by="title", ascending=True)
-    if export == True: 
+    if export == True:
         genres_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned genres data to %s", output_path)
     return genres_df
@@ -219,7 +269,9 @@ def clean_budgets_to_csv(
 
     # dropping dates that are > than the current date
     if "Release Date" in budgets_df.columns:
-        budgets_df["Release Date"] = pd.to_datetime(budgets_df["Release Date"], errors="coerce")
+        budgets_df["Release Date"] = pd.to_datetime(
+            budgets_df["Release Date"], errors="coerce"
+        )
         today = pd.to_datetime(datetime.today())
         budgets_df = budgets_df[budgets_df["Release Date"] <= today]
         logger.info("Filtered out future release dates.")
@@ -227,14 +279,18 @@ def clean_budgets_to_csv(
         logger.info("Extracted year from 'Release Date'.")
 
     # normalizing movie titles & creating new column
-    budgets_df = normalize_title_column(budgets_df, column="Movie", new_column="normalized_title")
+    budgets_df = normalize_title_column(
+        budgets_df, column="Movie", new_column="normalized_title"
+    )
     logger.info("Normalized movie titles.")
 
     # dropping duplicates based on the normalized title AND year
     pre_dupes = len(budgets_df)
     budgets_df = budgets_df.drop_duplicates(subset=["normalized_title", "year"])
-    logger.info("Dropped %d duplicate rows by normalized title and year.",
-                pre_dupes - len(budgets_df),)
+    logger.info(
+        "Dropped %d duplicate rows by normalized title and year.",
+        pre_dupes - len(budgets_df),
+    )
 
     # generating fallback merge key: normalized_title + year
     budgets_df = add_normalized_title_year(budgets_df, title_col="normalized_title")
@@ -245,11 +301,15 @@ def clean_budgets_to_csv(
     logger.info("Grouped data by decade.")
 
     # organizing and outputting results to CSV
-    budgets_df = standardize_columns(budgets_df, source="budget", column_order=column_order)
-    budgets_df = prune_columns(budgets_df, target_cols=target_column_order, source_name='budget')
-    
+    budgets_df = standardize_columns(
+        budgets_df, source="budget", column_order=column_order
+    )
+    budgets_df = prune_columns(
+        budgets_df, target_cols=target_column_order, source_name="budget"
+    )
+
     budgets_df = budgets_df.sort_values(by="title", ascending=True)
-    if export == True: 
+    if export == True:
         budgets_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned budget data to %s", output_path)
     return budgets_df

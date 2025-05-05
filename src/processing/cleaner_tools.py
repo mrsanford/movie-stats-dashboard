@@ -3,7 +3,6 @@ from src.utils.logging import setup_logger
 import pandas as pd
 from typing import List
 import glob
-import ast
 import os
 
 
@@ -35,7 +34,13 @@ def normalize_title_column(
     Returns:
         pd.DataFrame: updated DataFrame with normalized titles.
     """
-    df[new_column] = (df[column].astype(str).str.lower().str.replace(r"\W+", "", regex=True).str.strip())
+    df[new_column] = (
+        df[column]
+        .astype(str)
+        .str.lower()
+        .str.replace(r"\W+", "", regex=True)
+        .str.strip()
+    )
     return df
 
 
@@ -52,7 +57,9 @@ def extract_year(
     Returns:
         pd.DataFrame: DataFrame with added 'year' column
     """
-    df[output_column] = pd.to_datetime(df[date_column], errors="coerce").dt.year.astype("Int64")
+    df[output_column] = pd.to_datetime(df[date_column], errors="coerce").dt.year.astype(
+        "Int64"
+    )
     return df
 
 
@@ -61,8 +68,13 @@ def add_normalized_title_year(df: pd.DataFrame, title_col: str, year_col: str = 
     Creates normalized_title + year column
     """
     return df.assign(
-        normalized_title_year=(df[title_col].astype(str).str.strip().str.lower()
-                + "_" + df[year_col].astype(str).str.strip()))
+        normalized_title_year=(
+            df[title_col].astype(str).str.strip().str.lower()
+            + "_"
+            + df[year_col].astype(str).str.strip()
+        )
+    )
+
 
 def drop_unused_columns(df: pd.DataFrame, cols_to_drop: list) -> pd.DataFrame:
     """
@@ -78,7 +90,7 @@ def drop_unused_columns(df: pd.DataFrame, cols_to_drop: list) -> pd.DataFrame:
     return df.drop(columns=cols_to_drop, errors="ignore")
 
 
-def split_genres_list(df: pd.DataFrame, genre_column='genre') -> List[str]:
+def split_genres_list(df: pd.DataFrame, genre_column="genre") -> List[str]:
     """
     Converts genre strings to a list for each row
     ---
@@ -91,12 +103,14 @@ def split_genres_list(df: pd.DataFrame, genre_column='genre') -> List[str]:
     df = df.copy()
     if genre_column not in df.columns:
         raise ValueError(f"'{genre_column}' column not found in dataframe.")
-    df[genre_column] = df[genre_column].fillna('')
+    df[genre_column] = df[genre_column].fillna("")
+
     def safe_split(genres):
         if isinstance(genres, str) and genres.strip() != "":
             return [g.strip().title() for g in genres.split(",") if g.strip()]
         else:
             return []
+
     df[genre_column] = df[genre_column].apply(safe_split)
     return df
 
@@ -117,6 +131,7 @@ def group_decades(year: int) -> None:
         return f"{start}–{end}"
     except Exception:
         return None
+
 
 def standardize_columns(
     df: pd.DataFrame, source: str, column_order: list = None
@@ -155,7 +170,9 @@ def generate_col_order(source: str) -> List[str]:
     return list(mapping.values()) + list(shared.values())
 
 
-def prune_columns(df: pd.DataFrame, target_cols: list, source_name: str = "") -> pd.DataFrame:
+def prune_columns(
+    df: pd.DataFrame, target_cols: list, source_name: str = ""
+) -> pd.DataFrame:
     """
     Prunes DataFrame to only include target columns, logging any missing ones
     ---
@@ -169,7 +186,7 @@ def prune_columns(df: pd.DataFrame, target_cols: list, source_name: str = "") ->
     logger = setup_logger("column_pruner", "merge_datasets")
     missing = set(target_cols) - set(df.columns)
     if missing:
-        logger.info(f'Missing columns in {source_name}: {missing}')
+        logger.info(f"Missing columns in {source_name}: {missing}")
     return df[[col for col in target_cols if col in df.columns]]
     # # Optionally: Fill missing columns with NaNs before reindex
     # for col in missing:

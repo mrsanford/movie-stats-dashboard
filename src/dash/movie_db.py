@@ -1,8 +1,7 @@
 from src.database.database import BaseDB
-from src.utils.helpers import MOVIZ_DB_PATH
 import pandas as pd
 
-MOVIE_DB_PATH = 'data/processedmovies.sqlite'
+MOVIE_DB_PATH = "data/processedmovies.sqlite"
 
 
 class MoVIZ(BaseDB):
@@ -37,9 +36,13 @@ class MoVIZ(BaseDB):
           AND m.decade = :decade
         ORDER BY m.normalized_title;
         """
-        return self.run_query(sql, {"genre": genre, "decade": decade})["normalized_title"].tolist()
+        return self.run_query(sql, {"genre": genre, "decade": decade})[
+            "normalized_title"
+        ].tolist()
 
-    def get_data(self, genre: str = None, decade: str = None, title: str = None) -> pd.DataFrame:
+    def get_data(
+        self, genre: str = None, decade: str = None, title: str = None
+    ) -> pd.DataFrame:
         params = {"genre": genre, "decade": decade, "title": title}
         if title:
             sql = """
@@ -81,37 +84,33 @@ class MoVIZ(BaseDB):
         budget_range: list[int] = None,
         revenue_range: list[int] = None,
         ratings_range: list[float] = None,
-        certificates: list[str] = None) -> pd.DataFrame:
+        certificates: list[str] = None,
+    ) -> pd.DataFrame:
         conditions = []
         params = {}
 
         if decades:
-            placeholders = ', '.join([f":decade_{i}" for i in range(len(decades))])
+            placeholders = ", ".join([f":decade_{i}" for i in range(len(decades))])
             conditions.append(f"m.decade IN ({placeholders})")
             params.update({f"decade_{i}": val for i, val in enumerate(decades)})
-
         if genres:
-            placeholders = ', '.join([f":genre_{i}" for i in range(len(genres))])
+            placeholders = ", ".join([f":genre_{i}" for i in range(len(genres))])
             conditions.append(f"g.genre_name IN ({placeholders})")
             params.update({f"genre_{i}": val for i, val in enumerate(genres)})
-
         if budget_range:
             conditions.append("b.production_budget BETWEEN :min_budget AND :max_budget")
             params["min_budget"] = budget_range[0]
             params["max_budget"] = budget_range[1]
-
         if revenue_range:
             conditions.append("b.worldwide_gross BETWEEN :min_gross AND :max_gross")
             params["min_gross"] = revenue_range[0]
             params["max_gross"] = revenue_range[1]
-
         if ratings_range:
             conditions.append("m.rating BETWEEN :min_rating AND :max_rating")
             params["min_rating"] = ratings_range[0]
             params["max_rating"] = ratings_range[1]
-
         if certificates:
-            placeholders = ', '.join([f":cert_{i}" for i in range(len(certificates))])
+            placeholders = ", ".join([f":cert_{i}" for i in range(len(certificates))])
             conditions.append(f"m.certificate IN ({placeholders})")
             params.update({f"cert_{i}": val for i, val in enumerate(certificates)})
 
@@ -125,8 +124,6 @@ class MoVIZ(BaseDB):
         JOIN tGenre g ON mg.genre_id = g.genre_id
         {"WHERE " + where_clause if where_clause else ""}
         """
-        print("SQL query being run:\n", sql)
-        print("With parameters:\n", params)
         return self.run_query(sql, params)
 
     def get_all_data(self) -> pd.DataFrame:

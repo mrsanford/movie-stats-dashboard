@@ -103,19 +103,19 @@ class MovieDB(BaseDB):
         """
         Initializing the MovieDB class and optionally creating schema if not previously existing
         """
-        self.logger = setup_logger('MovieDB', 'database')
+        self.logger = setup_logger("MovieDB", "database")
         super().__init__(self.PATH, create=True)
         if not self._existed:
-            self.logger.info('Database not found. Creating schema')
+            self.logger.info("Database not found. Creating schema")
             self._create_tables()
         else:
-            self.logger.info('Database already exists. Using existing schema')
+            self.logger.info("Database already exists. Using existing schema")
 
     def _create_tables(self) -> None:
         """
         Creates tables and indexes necessary for MoVIZ
         """
-        self.logger.info('Creating tables')
+        self.logger.info("Creating tables")
 
         # tMovie Table
         self.run_action("""
@@ -158,16 +158,24 @@ class MovieDB(BaseDB):
                 FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id)
             );""")
         # Creating additional indices for faster queries
-        self.run_action("CREATE INDEX IF NOT EXISTS idx_budget_movie_id ON tBudget(movie_id);")
-        self.run_action("CREATE INDEX IF NOT EXISTS idx_moviegenre_movie_id ON tMovieGenre(movie_id);")
-        self.run_action("CREATE INDEX IF NOT EXISTS idx_moviegenre_genre_id ON tMovieGenre(genre_id);")
-        self.logger.info('Tables and indexes successfully created')
+        self.run_action(
+            "CREATE INDEX IF NOT EXISTS idx_budget_movie_id ON tBudget(movie_id);"
+        )
+        self.run_action(
+            "CREATE INDEX IF NOT EXISTS idx_moviegenre_movie_id ON tMovieGenre(movie_id);"
+        )
+        self.run_action(
+            "CREATE INDEX IF NOT EXISTS idx_moviegenre_genre_id ON tMovieGenre(genre_id);"
+        )
+        self.logger.info("Tables and indexes successfully created")
         return
-    
+
     def load_from_dataframes(
-            self,
-            movies_df: pd.DataFrame, budgets_df: pd.DataFrame,
-            genre_table: pd.DataFrame, movie_genre_links: pd.DataFrame
+        self,
+        movies_df: pd.DataFrame,
+        budgets_df: pd.DataFrame,
+        genre_table: pd.DataFrame,
+        movie_genre_links: pd.DataFrame,
     ) -> None:
         """
         Loads cleaned and merged DataFrames directory into SQLite database
@@ -178,21 +186,36 @@ class MovieDB(BaseDB):
             genre_table (pd.DataFrame): genre lookup table
             movie_genre_links (pd.DataFrame): pivot table linking movies and genres
         """
-        self.logger.info('Beginning data insertion into MoVIZ database')
+        self.logger.info("Beginning data insertion into MoVIZ database")
         self._connect()
         try:
             # Inserting into tMovies
             movie_cols = [
-            'movie_id', 'title', 'normalized_title', 'release_date',
-            'year', 'decade', 'certificate', 'rating', 'votes',
-            'runtime', 'description', 'production_countries']
+                "movie_id",
+                "title",
+                "normalized_title",
+                "release_date",
+                "year",
+                "decade",
+                "certificate",
+                "rating",
+                "votes",
+                "runtime",
+                "description",
+                "production_countries",
+            ]
             movie_sql = f"INSERT OR IGNORE INTO tMovie VALUES ({','.join(['?'] * len(movie_cols))})"
             for row in movies_df[movie_cols].itertuples(index=False, name=None):
                 self._curs.execute(movie_sql, row)
                 self.logger.info(f"Inserted {len(movies_df)} rows into tMovie")
 
             # Inserting into tBudgets
-            budget_cols = ['movie_id', 'production_budget', 'domestic_gross', 'worldwide_gross']
+            budget_cols = [
+                "movie_id",
+                "production_budget",
+                "domestic_gross",
+                "worldwide_gross",
+            ]
             budget_sql = """
             INSERT OR IGNORE INTO tBudget (
                 movie_id, production_budget, domestic_gross, worldwide_gross
@@ -202,24 +225,32 @@ class MovieDB(BaseDB):
                 self._curs.execute(budget_sql, row)
             self.logger.info(f"Inserted {len(budgets_df)} rows into tBudget")
 
-            # Inserting into tGenre  
-            genre_sql = "INSERT OR IGNORE INTO tGenre (genre_id, genre_name) VALUES (?, ?)"
-            for row in genre_table[['genre_id', 'genre_name']].itertuples(index=False, name=None):
+            # Inserting into tGenre
+            genre_sql = (
+                "INSERT OR IGNORE INTO tGenre (genre_id, genre_name) VALUES (?, ?)"
+            )
+            for row in genre_table[["genre_id", "genre_name"]].itertuples(
+                index=False, name=None
+            ):
                 self._curs.execute(genre_sql, row)
             self.logger.info(f"Inserted {len(genre_table)} rows into tGenre")
 
             # Inserting into tMovieGenre
-            link_sql = "INSERT OR IGNORE INTO tMovieGenre (movie_id, genre_id) VALUES (?, ?)"
-            for row in movie_genre_links[['movie_id', 'genre_id']].itertuples(index=False, name=None):
+            link_sql = (
+                "INSERT OR IGNORE INTO tMovieGenre (movie_id, genre_id) VALUES (?, ?)"
+            )
+            for row in movie_genre_links[["movie_id", "genre_id"]].itertuples(
+                index=False, name=None
+            ):
                 self._curs.execute(link_sql, row)
             self.logger.info(f"Inserted {len(movie_genre_links)} rows into tMovieGenre")
 
             self._conn.commit()
-            self.logger.info('All data successfully committed')
+            self.logger.info("All data successfully committed")
         except Exception as e:
-            self.logger.error('Rolling back. Error occured during insertion')
+            self.logger.error("Rolling back. Error occured during insertion")
             self._conn.rollback()
             raise e
         finally:
             self._close()
-            self.logger.info('Database connection closed')
+            self.logger.info("Database connection closed")
