@@ -117,8 +117,8 @@ class MoVIZ(BaseDB):
 
         where_clause = " AND ".join(conditions)
         sql = f"""
-        SELECT m.decade, g.genre_name, m.rating, m.certificate,
-               b.production_budget, b.worldwide_gross
+        SELECT m.title, m.year, m.decade, g.genre_name, m.rating, m.certificate,
+            b.production_budget, b.worldwide_gross
         FROM tMovie m
         JOIN tBudget b ON m.movie_id = b.movie_id
         JOIN tMovieGenre mg ON m.movie_id = mg.movie_id
