@@ -44,7 +44,7 @@ def logs_exist(log_dir=LOGS_DATA) -> bool:
     Returns True if any .log file in the logs directory is non-empty
     """
     os.makedirs(log_dir, exist_ok=True)
-    log_files = glob.glob(str(log_dir / "*.log"))
+    log_files = glob.glob(os.path.join(log_dir, "*.log"))
     return any(os.path.getsize(f) > 0 for f in log_files)
 
 
@@ -57,8 +57,7 @@ def clear_logs(log_dir=LOGS_DATA) -> None:
     """
     # ensures the log directories exists
     os.makedirs(log_dir, exist_ok=True)
-    # uses .glob to find all of the files in the directory
-    log_files = glob.glob(str(log_dir / "*.log"))
+    log_files = glob.glob(os.path.join(log_dir, "*.log"))
     for log_path in log_files:
         # overwrites the logs with zero length (clearing the logs)
         with open(log_path, "w") as f:
