@@ -7,7 +7,7 @@ from tqdm import tqdm
 from src.utils.helpers import BUDGET_RAW_FILE
 from src.utils.logging import setup_logger
 
-# dummy headers and clean_money
+# dummy headers
 headers = {"User-Agent": "Mozilla/5.0"}
 logger = setup_logger("budget_scraper", "webscrape_budgets")
 
