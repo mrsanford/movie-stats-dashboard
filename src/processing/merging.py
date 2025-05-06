@@ -1,8 +1,15 @@
 import pandas as pd
 import ast
+import os
 from typing import List
 from src.utils.logging import setup_logger
 from src.utils.helpers import TMDB_CRIT_COLS, GENRES_CRIT_COLS, BUDGET_CRIT_COLS
+from src.utils.helpers import (
+    TMDB_OUTPUT_PATH,
+    GENRES_OUTPUT_PATH,
+    BUDGET_OUTPUT_PATH,
+    PROCESSED_PATH,
+)
 from src.processing.cleaning import (
     clean_tmdb_to_csv,
     clean_genres_to_csv,
@@ -185,10 +192,13 @@ def cleaning_and_merging(
     logger.info(
         f"Movie-genre pivot table creation complete: {movie_genre_pivot.shape[0]} links"
     )
-    # if export == True:
-    #     movies_master.to_csv(TMDB_OUTPUT_PATH, index=False)
-    #     genre_table.to_csv(GENRES_OUTPUT_PATH, index=False)
-    #     budgets_df.to_csv(BUDGET_OUTPUT_PATH, index=False)
-    #     movie_genre_pivot.to_csv(os.path.join(PROCESSED_PATH, "movie_genre_links.csv"), index=False)
+    # Exporting Merged Tables to CSV
+    if export is True:
+        movies_master.to_csv(TMDB_OUTPUT_PATH, index=False)
+        genre_table.to_csv(GENRES_OUTPUT_PATH, index=False)
+        budgets_df.to_csv(BUDGET_OUTPUT_PATH, index=False)
+        movie_genre_pivot.to_csv(
+            os.path.join(PROCESSED_PATH, "movie_genre_links.csv"), index=False
+        )
     logger.info("Cleaning and merging stage complete")
     return movies_master, budgets_df, genre_table, movie_genre_pivot
