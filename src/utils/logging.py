@@ -39,6 +39,15 @@ def setup_logger(name: str, log_file: str, level=logging.INFO):
     return logger
 
 
+def logs_exist(log_dir=LOGS_DATA) -> bool:
+    """
+    Returns True if any .log file in the logs directory is non-empty
+    """
+    os.makedirs(log_dir, exist_ok=True)
+    log_files = glob.glob(str(log_dir / "*.log"))
+    return any(os.path.getsize(f) > 0 for f in log_files)
+
+
 def clear_logs(log_dir=LOGS_DATA) -> None:
     """
     Clears contents of all .log files in the log directory
