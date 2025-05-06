@@ -1,4 +1,4 @@
-from src.utils.helpers import MOVIZ_DB_PATH
+from src.utils.helpers import MOVIE_DB_PATH
 from src.utils.logging import setup_logger
 import os
 import sqlite3
@@ -97,7 +97,7 @@ class BaseDB:
 
 
 class MovieDB(BaseDB):
-    PATH = MOVIZ_DB_PATH
+    PATH = MOVIE_DB_PATH
 
     def __init__(self, path: str = PATH, create: bool = False):
         """
