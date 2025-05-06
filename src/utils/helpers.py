@@ -25,7 +25,8 @@ KAGGLE_TMDB = "asaniczka/tmdb-movies-dataset-2023-930k-movies"
 KAGGLE_IMDB = "rajugc/imdb-movies-dataset-based-on-genre"
 
 # Movie Database Path
-MOVIZ_DB_PATH = os.path.join(PROCESSED_PATH, 'moviz_db.sqlite')
+MOVIZ_DB_PATH = os.path.join(PROCESSED_PATH, "moviz_db.sqlite")
+MOVIE_DB_PATH = "data/processedmovies.sqlite"
 
 # Columns to Drop
 GENRE_COLS_TO_DROP = [
@@ -83,7 +84,7 @@ COLUMN_MAPPING = {
         "Index": "index",
         "Movie": "title",
         "normalized_title": "normalized_title",
-        "normalized_title_year" : "normalized_title_year",
+        "normalized_title_year": "normalized_title_year",
         "Release Date": "release_date",
         "year": "year",
         "Production Budget": "production_budget",
@@ -94,21 +95,55 @@ COLUMN_MAPPING = {
 }
 
 # Pruned Analysis Columns
-PRUNED_TMDB_COLS = ['movie_id', 'title', 'normalized_title', 'normalized_title_year',
-                    'release_date', 'year', 'decade', 'rating', 'votes', 'runtime',
-                    'genre', 'budget', 'worldwide_gross', 'description', 'production_countries']
+PRUNED_TMDB_COLS = [
+    "movie_id",
+    "title",
+    "normalized_title",
+    "normalized_title_year",
+    "release_date",
+    "year",
+    "decade",
+    "rating",
+    "votes",
+    "runtime",
+    "genre",
+    "budget",
+    "worldwide_gross",
+    "description",
+    "production_countries",
+]
 
-PRUNED_GENRE_COLS = ['movie_id', 'title', 'normalized_title', 'normalized_title_year', 'certificate',
-                     'year', 'decade', 'rating', 'votes', 'runtime', 'genre', 'description']
+PRUNED_GENRE_COLS = [
+    "movie_id",
+    "title",
+    "normalized_title",
+    "normalized_title_year",
+    "certificate",
+    "year",
+    "decade",
+    "rating",
+    "votes",
+    "runtime",
+    "genre",
+    "description",
+]
 
-PRUNED_BUDGET_COLS = ['title', 'normalized_title', 'normalized_title_year',
-                      'release_date', 'year', 'decade', 'production_budget',
-                      'domestic_gross', 'worldwide_gross']
+PRUNED_BUDGET_COLS = [
+    "title",
+    "normalized_title",
+    "normalized_title_year",
+    "release_date",
+    "year",
+    "decade",
+    "production_budget",
+    "domestic_gross",
+    "worldwide_gross",
+]
 
 # Critical Columns (for Merge)
-TMDB_CRIT_COLS = ['movie_id', 'title', 'normalized_title', 'year','decade']
-GENRES_CRIT_COLS = ['movie_id', 'title', 'normalized_title', 'year','decade']
-BUDGET_CRIT_COLS = ['title', 'normalized_title', 'year', 'decade']
+TMDB_CRIT_COLS = ["movie_id", "title", "normalized_title", "year", "decade"]
+GENRES_CRIT_COLS = ["movie_id", "title", "normalized_title", "year", "decade"]
+BUDGET_CRIT_COLS = ["title", "normalized_title", "year", "decade"]
 
 # Ratings Mapping
 RATING_MAP = {
