@@ -348,13 +348,28 @@ def filter_data(filters):
     )
 
 
-@callback(Output("movie-count", "children"), Input("filtered-data", "data"))
-def update_movie_count(data):
-    return (
-        f"{len(data)} movies match your filters."
-        if data
-        else "No movies match your filters."
-    )
+# @callback(Output("movie-count", "children"), Input("filtered-data", "data"))
+# def update_movie_count(data):
+#     return (
+#         f"{len(data)} movies match your filters."
+#         if data
+#         else "No movies match your filters."
+#     )
+
+
+@callback(
+    Output("movie-count", "children"),
+    Input("filtered-data", "data"),
+    Input("x-axis", "value"),
+    Input("y-axis", "value"),
+)
+def update_movie_count(data, x, y):
+    total = len(data) if data else 0
+    plotted = 0
+    if data and x and y:
+        df = pd.DataFrame(data)
+        plotted = df[[x, y]].dropna().shape[0]
+    return f"{total} movies match your filters. {plotted} plotted on graph."
 
 
 @callback(
