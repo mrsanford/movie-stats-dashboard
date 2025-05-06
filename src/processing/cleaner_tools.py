@@ -86,7 +86,6 @@ def drop_unused_columns(df: pd.DataFrame, cols_to_drop: list) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with specified columns removed
     """
-    # df.drop([col for col in cols_to_drop if col in df.columns])
     return df.drop(columns=cols_to_drop, errors="ignore")
 
 
@@ -188,7 +187,3 @@ def prune_columns(
     if missing:
         logger.info(f"Missing columns in {source_name}: {missing}")
     return df[[col for col in target_cols if col in df.columns]]
-    # # Optionally: Fill missing columns with NaNs before reindex
-    # for col in missing:
-    #     df[col] = pd.NA
-    # return df.reindex(columns=target_cols)
