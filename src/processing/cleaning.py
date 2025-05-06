@@ -131,7 +131,7 @@ def clean_tmdb_to_csv(
         tmdb_df, target_cols=target_column_order, source_name="tmdb"
     )
     tmdb_df = tmdb_df.sort_values(by="title", ascending=True)
-    if export == True:
+    if export is True:
         tmdb_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned TMDb data to %s", output_path)
     return tmdb_df
@@ -237,7 +237,7 @@ def clean_genres_to_csv(
         genres_df, target_cols=target_column_order, source_name="genres"
     )
     genres_df = genres_df.sort_values(by="title", ascending=True)
-    if export == True:
+    if export is True:
         genres_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned genres data to %s", output_path)
     return genres_df
@@ -309,7 +309,7 @@ def clean_budgets_to_csv(
     )
 
     budgets_df = budgets_df.sort_values(by="title", ascending=True)
-    if export == True:
+    if export is True:
         budgets_df.to_csv(output_path, index=False)
         logger.info("Exported cleaned budget data to %s", output_path)
     return budgets_df
