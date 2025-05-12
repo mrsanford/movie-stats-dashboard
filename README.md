@@ -1,4 +1,4 @@
-# **MOVIZ Visualization Tool – *Welcome to MoVIZ 🎞* **
+# MOVIZ Visualization Tool – *Welcome to MoVIZ 🎞*
 
 *MOVIZ* enable users to visualize movie statistics ranging from budget indie projects to record-breaking blockbusters, from the earliest films to newest releases.
 The project implements a full data pipeline to ingest up-to-date datasets from TMDB, IMDb, and *The Numbers* budget dataset, applying normalization and various cleaning methods, and a robust database. The MoVIZ database contains a wide array of films from 1880 to 2025. Users can filter their desired characteristics, analyze, and visualize relationships between genres, decades, certificates, ratings, production budgets, and worldwide box office gross, all with a user-friend GUI. 
