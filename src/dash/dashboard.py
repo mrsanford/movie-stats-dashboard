@@ -29,7 +29,10 @@ def create_layout(app: Dash):
 
     header = html.Div(
         [
-            html.H1("MoVIZ Visualization Explorer", style={"textAlign": "center"}),
+            html.H1(
+                "MoVIZ Visualization Explorer",
+                style={"textAlign": "center", "color": "#FFD700"},
+            ),
             html.P(
                 "Welcome to MoVIZ, where movies and visualization meet! You can explore "
                 "budget, revenue, ratings, and other movie statistic relationships. Simply "
@@ -39,22 +42,25 @@ def create_layout(app: Dash):
                     "textAlign": "center",
                     "fontSize": "16px",
                     "marginTop": "-10px",
-                    "color": "#555",
+                    "color": "#FFFFFF",
                 },
             ),
         ],
         style={
             "fontFamily": "Calibri, sans-serif",
             "padding": "20px",
-            "backgroundColor": "#f1f1f1",
+            "backgroundColor": "#2C2C2C",
             "borderRadius": "8px",
-            "boxShadow": "0px 4px 10px rgba(0,0,0,0.05)",
+            "boxShadow": "0px 4px 10px rgba(0,0,0,0.3)",
         },
     )
 
     cat_label = html.Div(
         [
-            html.Label("Select criteria you would like to filter:"),
+            html.Label(
+                "Select target criteria to filter:",
+                style={"color": "#FF0000", "fontWeight": "bold"},
+            ),
             dcc.Dropdown(
                 id="char-selector",
                 options=filter_characteristics,
@@ -65,7 +71,7 @@ def create_layout(app: Dash):
         ],
         style={
             "padding": "20px",
-            "backgroundColor": "#fff",
+            "backgroundColor": "#FFFFFF",
             "borderRadius": "8px",
             "boxShadow": "0px 4px 10px rgba(0,0,0,0.05)",
         },
@@ -73,12 +79,30 @@ def create_layout(app: Dash):
 
     filter_controls = html.Div(
         [
-            html.Button("Apply Filters", id="apply-filters", n_clicks=0),
+            html.Button(
+                "Apply Filters",
+                id="apply-filters",
+                n_clicks=0,
+                style={
+                    "backgroundColor": "#FF0000",
+                    "color": "white",
+                    "border": "none",
+                    "padding": "10px 20px",
+                    "borderRadius": "6px",
+                },
+            ),
             html.Button(
                 "Clear Filters",
                 id="clear-filters",
                 n_clicks=0,
-                style={"marginLeft": "10px"},
+                style={
+                    "marginLeft": "10px",
+                    "backgroundColor": "#FFD700",
+                    "color": "#2C2C2C",
+                    "border": "none",
+                    "padding": "10px 20px",
+                    "borderRadius": "6px",
+                },
             ),
         ],
         style={"marginTop": "20px"},
@@ -86,7 +110,7 @@ def create_layout(app: Dash):
 
     filter_summary = html.Div(
         id="filter-summary",
-        style={"marginTop": "10px", "fontSize": "15px", "color": "#333"},
+        style={"marginTop": "10px", "fontSize": "15px", "color": "#50C878"},
     )
 
     stores = html.Div(
@@ -117,7 +141,15 @@ def create_layout(app: Dash):
                 style={
                     "marginTop": "20px",
                     "fontSize": "16px",
-                    "color": "#444",
+                    "color": "#E0E0E0",
+                    "textAlign": "center",
+                },
+            ),
+            html.Div(
+                id="graph-warning",
+                style={
+                    "color": "#FF0000",
+                    "fontSize": "14px",
                     "textAlign": "center",
                 },
             ),
@@ -127,7 +159,7 @@ def create_layout(app: Dash):
         ],
         style={
             "padding": "20px",
-            "backgroundColor": "#fff",
+            "backgroundColor": "#2C2C2C",
             "borderRadius": "8px",
             "boxShadow": "0px 4px 10px rgba(0,0,0,0.05)",
         },
@@ -135,7 +167,7 @@ def create_layout(app: Dash):
 
     layout_style = {
         "fontFamily": "Calibri, sans-serif",
-        "backgroundColor": "#fafafa",
+        "backgroundColor": "#2C2C2C",
         "padding": "30px",
         "maxWidth": "1100px",
         "margin": "auto",
@@ -163,7 +195,7 @@ def generate_filter_widgets(selected, user_filters):
     custom_slider_settings = {
         "rating": {
             "step": 0.1,
-            "marks": {i: str(i) for i in range(0, 11)},  # 0 to 10
+            "marks": {i: str(i) for i in range(0, 11)},
         },
         "production_budget": {
             "step": 25_000_000,
@@ -190,7 +222,10 @@ def generate_filter_widgets(selected, user_filters):
     }
     if not selected:
         return []
-    df = MoVIZ().get_filtered_data(**(user_filters or {}))
+
+    df = MoVIZ().get_filtered_data(
+        **(user_filters or {})
+    )  # widget values are based on filtered data
     widgets = []
 
     if "certificate" in selected:
@@ -259,10 +294,6 @@ def generate_filter_widgets(selected, user_filters):
                     style={"marginBottom": "20px"},
                 )
             )
-            fig = px.histogram(col_series, nbins=30)
-            dcc.Graph(
-                figure=fig, config={"displayModeBar": False}, style={"height": "100px"}
-            )
         else:
             options = sorted(col_series.unique())
             dropdown = dcc.Dropdown(
@@ -273,7 +304,8 @@ def generate_filter_widgets(selected, user_filters):
             )
             widgets.append(
                 html.Div(
-                    [html.Label(f"Select {col.replace('_', ' ').title()}"), dropdown]
+                    [html.Label(f"Select {col.replace('_', ' ').title()}"), dropdown],
+                    style={"marginBottom": "20px"},
                 )
             )
     return widgets
@@ -323,19 +355,9 @@ def store_user_filters(
 
 @callback(Output("filter-summary", "children"), Input("user-filters", "data"))
 def display_filter_summary(filters):
-    if not filters:
-        return "No filters applied. Showing all movies."
-
-    def fmt(val):
-        if isinstance(val, list):
-            if len(val) == 2 and all(isinstance(x, (int, float)) for x in val):
-                return f"{val[0]} to {val[1]}"
-            return ", ".join(map(str, val))
-        return str(val)
-
-    return "Filters applied — " + "; ".join(
-        [f"{k.replace('_', ' ').title()}: {fmt(v)}" for k, v in filters.items() if v]
-    )
+    if not filters or not any(filters.values()):
+        return ""
+    return "Filters successfully applied"
 
 
 @callback(Output("filtered-data", "data"), Input("user-filters", "data"))
@@ -346,15 +368,6 @@ def filter_data(filters):
         if filters
         else db.get_filtered_data().to_dict("records")
     )
-
-
-# @callback(Output("movie-count", "children"), Input("filtered-data", "data"))
-# def update_movie_count(data):
-#     return (
-#         f"{len(data)} movies match your filters."
-#         if data
-#         else "No movies match your filters."
-#     )
 
 
 @callback(
@@ -369,7 +382,7 @@ def update_movie_count(data, x, y):
     if data and x and y:
         df = pd.DataFrame(data)
         plotted = df[[x, y]].dropna().shape[0]
-    return f"{total} movies match your filters. {plotted} plotted on graph."
+    return f"{total} movies match your filters."
 
 
 @callback(
@@ -394,6 +407,32 @@ def update_axis_options(data):
     available = [col for col in possible if col in df.columns and df[col].notna().any()]
     opts = [{"label": col.replace("_", " ").title(), "value": col} for col in available]
     return opts, opts, False, False
+
+
+@callback(
+    Output("graph-warning", "children"),
+    Output("go-button", "disabled"),
+    Input("x-axis", "value"),
+    Input("y-axis", "value"),
+    State("filtered-data", "data"),
+)
+def validate_axis_selection(x, y, data):
+    if not x or not y or not data:
+        return "", True  # disables button if not ready
+
+    df = pd.DataFrame(data)
+    x_type = df[x].dtype
+    y_type = df[y].dtype
+
+    # if x is numeric and y is categorical -> not allowed
+    if pd.api.types.is_numeric_dtype(x_type) and not pd.api.types.is_numeric_dtype(
+        y_type
+    ):
+        warning = f"Invalid Plot Selection: Cannot plot quantitative '{x}' on X with qualitative '{y}' on Y. Please select a different combination."
+        return warning, True
+
+    # disables button if both are empty or invalid
+    return "", False
 
 
 @callback(

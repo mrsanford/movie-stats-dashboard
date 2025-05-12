@@ -1,15 +1,16 @@
 # **Welcome to the MOVIZ Visualization Tool 🎞📽**
 
 ## Overview
-*MOVIZ* enables users to explore trends and discover hidden trends in movie statistics from small, independent projects to record-breaking blockbusters, from the earliest films to newest releases.
+*MOVIZ* enables users to visualize trends in movie statistics from small, independent projects to record-breaking blockbusters, from the earliest films to the newest releases.
 
+rmation**
+  - diagram of normalized column names and dataset equivalencies
+  - dropped columns
 ### Features
 The project implements a full data pipeline and outputs an interative GUI:
 - **Data Ingestion**
   - Automatically downloads and loads datasets from TMDb, IMDb Genres, and budget [project datasets](#Acknowledgements)
-- **Data Cleaning & Transformation**
-  - diagram of normalized column names and dataset equivalencies
-  - dropped columns
+- **Data Cleaning & Transfo
   - missing values
   - transformations/assumptions included augmented/added columns
   - normalized fields
@@ -35,6 +36,37 @@ To launch the application and to begin visualization, clone the repository and r
 
 ## Project Structure
 ```
+data/
+├── processed/
+├── raw/
+
+logs/
+
+src/
+├── dash/
+│   ├── dashboard_testing.py
+│   └── movie_db.py
+├── database/
+│   └── database.py
+├── downloading/
+│   ├── downloading.py
+│   └── webscraping.py
+├── processing/
+│   ├── cleaner_tools.py
+│   ├── cleaning.py
+│   └── merging.py
+└── utils/
+    ├── helpers.py
+    └── logging.py
+
+.gitattributes
+.gitignore
+.python-version
+dataframe_testing.ipynb
+main.py
+pyproject.toml
+README.md
+uv.lock
 ```
 
 ## Acknowledgements
@@ -42,3 +74,4 @@ This project is the combination of my love for movies and statistics. MOVIZ's da
 1. [u/asaniczka](https://github.com/asaniczka)'s ["Full TMDB Movies Dataset 2024 (1M Movies)"](https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies) via Kaggle
 2. [u/ChidambaraRaju](https://github.com/ChidambaraRaju)'s ['IMDb Movie Dataset: All Movies by Genre'](https://www.kaggle.com/datasets/rajugc/imdb-movies-dataset-based-on-genre) via Kaggle
 3. Movie Budget data from [The-Numbers.com](https://www.the-numbers.com/movie/budgets/all)
+4. The palette used can be found [here](https://www.color-hex.com/color-palette/23102)
