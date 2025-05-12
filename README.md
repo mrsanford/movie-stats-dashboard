@@ -1,9 +1,10 @@
 # **Welcome to the MOVIZ Visualization Tool 🎞📽**
 
 ## Overview
-*MOVIZ* enables users to visualize trends in movie statistics from small, independent projects to record-breaking blockbusters, from the earliest films to the newest releases.
+*MOVIZ* enables users to visualize trends in movie statistics ranging from small, independent projects to record-breaking blockbusters, from the earliest films to newest releases. The project implements a full data pipeline to ingest the most up-to-date data, to process and merge the datasets and create a database, and to visualize various graphs derived from the database.
 
 ### Features
+The ![write-up](DATA440_Final_Project_Write-Up_(GitHub).pdf) for the project is available for further detail and dataset cleaning justification.
 The project implements a full data pipeline and outputs an interative GUI:
 - **Data Ingestion**
   - Automatically downloads and loads datasets from TMDb, IMDb Genres, and budget [project datasets](#Acknowledgements)
@@ -19,10 +20,12 @@ The project implements a full data pipeline and outputs an interative GUI:
   - time spans from 1880 to 04/2025 to allow for leniency in the inclusion of the earliest movies. The basis for 1880 comes from the first motion picture created, the [*Roundhay Garden Scene*]([url](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.)) in 1888. In line with released movies, MOVIZ is limited to movies released on or before April 2025.
   - genre_db certificates and developing equivalencies
   - 
-- **Relational Database Table Construction**
+
+**Relational Database Table Construction**
 ![MoVIZ Database Tables](MoVIZ_RDb.pdf)
 
-- **Interactive Visualization GUI**
+**Interactive Visualization GUI**
+The implementation has been created with Dash.
 
 
 ### Considerations
@@ -37,9 +40,7 @@ To launch the application and begin visualization for the first time, clone the 
 data/
 ├── processed/
 ├── raw/
-
 logs/
-
 src/
 ├── dash/
 │   ├── dashboard_testing.py
@@ -59,10 +60,11 @@ src/
 .gitattributes
 .gitignore
 .python-version
-dataframe_testing.ipynb
 main.py
 pyproject.toml
 README.md
+DATA440_Final_Project_Write-Up_(GitHub).pdf
+MoVIZ_RDb.pdf
 uv.lock
 ```
 
@@ -71,4 +73,4 @@ This project is the combination of my love for movies and statistics. MOVIZ's da
 1. [u/asaniczka](https://github.com/asaniczka)'s ["Full TMDB Movies Dataset 2024 (1M Movies)"](https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies) via Kaggle
 2. [u/ChidambaraRaju](https://github.com/ChidambaraRaju)'s ['IMDb Movie Dataset: All Movies by Genre'](https://www.kaggle.com/datasets/rajugc/imdb-movies-dataset-based-on-genre) via Kaggle
 3. Movie Budget data from [The-Numbers.com](https://www.the-numbers.com/movie/budgets/all)
-4. The palette used can be found [here](https://www.color-hex.com/color-palette/23102)
+4. Thank you to https://dbdiagram.io/home, which was used to create my database table logic
