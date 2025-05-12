@@ -1,26 +1,27 @@
-# **MOVIZ Visualization Tool 🎞**
+# **MOVIZ Visualization Tool**
 
-## Overview -- Welcome to MoVIZ
-*MOVIZ* enable users to visualize movie statistics ranging from budget indie projects to record-breaking blockbusters, from the earliest films to newest releases. The project implements a full data pipeline to ingest up-to-date datasets from TMDB, IMDb, and *The Numbers* budget dataset, applying normalization and various cleaning methods, and a robust database. The MoVIZ database contains a wide array of films from 1880 to 2025. Users can filter their desired characteristics, analyze, and visualize relationships between genres, decades, certificates, ratings, production budgets, and worldwide box office gross, all with a user-friend GUI. 
+## Overview – Welcome to MoVIZ 🎞
+*MOVIZ* enable users to visualize movie statistics ranging from budget indie projects to record-breaking blockbusters, from the earliest films to newest releases.
+The project implements a full data pipeline to ingest up-to-date datasets from TMDB, IMDb, and *The Numbers* budget dataset, applying normalization and various cleaning methods, and a robust database. The MoVIZ database contains a wide array of films from 1880 to 2025. Users can filter their desired characteristics, analyze, and visualize relationships between genres, decades, certificates, ratings, production budgets, and worldwide box office gross, all with a user-friend GUI. 
 
 ### Features
 
 **Data Ingestion and Cleaning**
-The pipeline handles the downloading and loading datasets from TMDB, IMDb Genres, and budget [project datasets](#Acknowledgements). Each dataset contributes various data to MoVIZ.
+The pipeline handles the downloading and loading datasets from TMDB, IMDb Genres, and budget [project datasets](#Acknowledgements). Each dataset contributes various data to MoVIZ:
 - TMDB dataset: comprehensive movie metadata (title, release date, ratings, etc.)
 - IMDb Genres dataset: genres, equivalency id mappings, certificates
 - Budget dataset: production budgets, domestic and worldwide gross earnings
 
 This portion of the pipeline prepares data for database ingestion by ensuring consistency across datasets through data type and column normalization, handling format discrepancies and missing values.
 - **Title Normalization**: lowercased all text and removed whitespace/special characters to ensure ease in merging on fallback keys
-- **Year Extraction**: extracted year from various date formats in all three datasets, and enforced date range (1880-2025)
-- **Certificate Mapping**: realigned certificates to the MPAA rating system
+- **Year Extraction**: extracted ```year``` from various date formats in all three datasets, and enforced date range (1880-2025)
+- **Certificate Mapping**: realigned movies rated under foreign criteria to the MPAA rating certificates
 - **Genre Mapping**: standardized genre names
 - **Duplicate Removal**: removed duplicates by ```imdb_id``` for the Genres dataset and ```movie_id``` for the TMDB dataset, then performed a fallback drop to remove duplicates on ```normalized_title``` and ```year```
 - **Adult Content & Status Filtering**: excluded adult films and any non-'Released' film titles in the TMDB dataset
-- **Dataset Augmentation**: added ```decade``` column for enhanced historical handling
-- **Null Value Handling**: created a critical and non-critical column threshold; dropped rows with null values in critical columns and implemented secondary framework to remove rows given 80% of data was missing in non-critical columns
-- **Column Normalization**: standardized column names across all the datasets
+- **Dataset Augmentation**: added ```decade``` column for enhanced historical handling in all three datasets
+- **Null Value Handling**: implemented a critical and non-critical column hierarchy and threshold (i.e. title and date would be considered critical to a film's identification but certificate may be considered non-critical); dropped rows with null values in critical columns and implemented secondary framework to remove rows given 80% of data was missing in non-critical columns
+- **Column Normalization**: standardized column names across all the datasets for ease of merging for the database step
 
 **Relational Database Table Diagram**
 - Here are the database logic tables used for MoVIZ.
