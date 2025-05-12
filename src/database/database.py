@@ -157,7 +157,7 @@ class MovieDB(BaseDB):
                 worldwide_gross INTEGER,
                 FOREIGN KEY (movie_id) REFERENCES tMovie(movie_id)
             );""")
-        # Creating additional indices for faster queries
+        # creating additional indices for faster queries
         self.run_action(
             "CREATE INDEX IF NOT EXISTS idx_budget_movie_id ON tBudget(movie_id);"
         )
@@ -189,7 +189,7 @@ class MovieDB(BaseDB):
         self.logger.info("Beginning data insertion into MoVIZ database")
         self._connect()
         try:
-            # Inserting into tMovies
+            # inserting into tMovies
             movie_cols = [
                 "movie_id",
                 "title",
@@ -209,7 +209,7 @@ class MovieDB(BaseDB):
                 self._curs.execute(movie_sql, row)
                 self.logger.info(f"Inserted {len(movies_df)} rows into tMovie")
 
-            # Inserting into tBudgets
+            # inserting into tBudgets
             budget_cols = [
                 "movie_id",
                 "production_budget",
@@ -225,7 +225,7 @@ class MovieDB(BaseDB):
                 self._curs.execute(budget_sql, row)
             self.logger.info(f"Inserted {len(budgets_df)} rows into tBudget")
 
-            # Inserting into tGenre
+            # inserting into tGenre
             genre_sql = (
                 "INSERT OR IGNORE INTO tGenre (genre_id, genre_name) VALUES (?, ?)"
             )
@@ -235,7 +235,7 @@ class MovieDB(BaseDB):
                 self._curs.execute(genre_sql, row)
             self.logger.info(f"Inserted {len(genre_table)} rows into tGenre")
 
-            # Inserting into tMovieGenre
+            # inserting into tMovieGenre
             link_sql = (
                 "INSERT OR IGNORE INTO tMovieGenre (movie_id, genre_id) VALUES (?, ?)"
             )
