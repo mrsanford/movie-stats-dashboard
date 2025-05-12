@@ -25,7 +25,7 @@ This portion of the pipeline prepares data for database ingestion by ensuring co
 **Relational Database Table Diagram**
 - Here are the database logic tables used for MoVIZ.
 <p align="center">
-  <img src="MoVIZ_RDb.png" width="500" alt="MoVIZ Database Tables Diagram">
+  <img src="docs/MoVIZ_RDb.png" width="500" alt="MoVIZ Database Table Diagram">
 </p>
 
 **Data Merging and Table Relationships**
@@ -61,7 +61,7 @@ Upon launching, the application will automatically check for existing data and p
 ### Considerations and Scope
 - Due to GitHub's max limit on the size of dataset files, I have opted not to push ```/processed``` and ```/raw``` files and folders; however, the framework will populate and become available upon cloning the repository and running the pipeline.
 - The decision for the date ranges from ```1880-1889``` to 04/2025 is to allow for leniency and to allow for the earliest movies to be included. The basis for 1880 comes from the first motion picture created, the [*Roundhay Garden Scene*](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.) in 1888. In line with limiting the dataset to released movies, MOVIZ's availability has been limited to movies released on or before April 2025.
-- If you would like more information on the project details, especially regarding dataset cleaning justification and related processes, the documentation write-up is available [here](DATA440_Final_Project_Write-Up_(GitHub).pdf).
+- If you would like more information on the project details, especially regarding dataset cleaning justification and related processes, the documentation write-up is available [here](docs/DATA440_Final_Project_Write-Up_(GitHub).pdf).
   - Note: In my references, I mention an IMDb dataset and a genres dataset-- they are the same dataset and the names are used interchangeably.
 
 ### Limitations
