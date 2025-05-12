@@ -22,12 +22,10 @@ The project implements a full data pipeline and outputs an interactive GUI:
   - 
 
 **Relational Database Table Construction**
-![MoVIZ Database Tables](MoVIZ_RDb.pdf)
+Below is the relational database structure used for MoVIZ
 <p align="center">
-  <img src="MoVIZ_RDb" width="350" title="hover text">
-  <img src="MoVIZ_RDb" width="350" alt="accessibility text">
+  <img src="images/MoVIZ_RDb.png" width="500" alt="MoVIZ Database Tables Diagram">
 </p>
-
 
 
 **Interactive Visualization GUI**
