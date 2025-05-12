@@ -41,10 +41,22 @@ The implementation has been built with [Dash](https://dash.plotly.com/). Users c
 - Exploring different types of data with dynamic plot types including scatter plots, bar charts, and stacked bar charts
 
 
-## Project Support
-This project was built with Python **3.12.8** and uses [`uv`](https://docs.astral.sh/uv/getting-started/installation/) for virtual environment and package management. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found [here](https://docs.astral.sh/uv/). 
+## Project Support and Installation
+This project was built with Python **3.12.8** and uses `uv` for virtual environment and package management. MOVIZ's dependencies are listed in `pyproject.toml`. To install `uv`, follow the the directions for your [system](https://docs.astral.sh/uv/getting-started/installation/).
 
-To launch the application and begin visualization for the first time, clone the repository and run with ```python main.py```. The application will automatically check for existing data and prompt you to run the pipeline if needed. Once the data is ready, the dashboard will launch at `http://localhost:8050/`.
+#### Quick Start
+```
+# clone the repository
+gh repo clone mrsanford/movie-stats-dashboard
+cd movie-stats-dashboard
+
+# install the dependencies
+uv pip install
+
+# run MoVIZ
+uv run main.py
+```
+Upon launching, the application will automatically check for existing data and prompt you to run the pipeline if needed. Once the data is ready, the dashboard will launch at `http://localhost:8050/`. For more help with uv, refer to the official [documentation](https://docs.astral.sh/uv/).
 
 ### Considerations and Scope
 - Due to GitHub's max limit on the size of dataset files, I have opted not to push ```/processed``` and ```/raw``` files and folders; however, the framework will populate and become available upon cloning the repository and running the pipeline.
