@@ -41,18 +41,22 @@ The implementation has been built with [Dash](https://dash.plotly.com/). Users c
 - Selecting customizable ranges and explorable values for their filters
 - Exploring different types of data with dynamic plot types including scatter plots, bar charts, and stacked bar charts
 
-### Considerations and Limitations
-- While *The Numbers* contains comprehensive financial coverage for roughly ~6000 films, please be aware that movies filtered on financial data may be limited in offerings compared to the larger offerings of films by TMDB and the IMDb datasets.
-- Due to GitHub's max limit on the size of dataset files, I have opted not to push ```/processed``` and ```/raw``` files and folders; however, the framework will populate and become available upon cloning the repository and running the pipeline.
+### Considerations
+Due to GitHub's max limit on the size of dataset files, I have opted not to push ```/processed``` and ```/raw``` files and folders; however, the framework will populate and become available upon cloning the repository and running the pipeline.
 - The decision for the date ranges from ```1880-1889``` to 04/2025 is to allow for leniency and to allow for the earliest movies to be included. The basis for 1880 comes from the first motion picture created, the [*Roundhay Garden Scene*](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.) in 1888. In style with the limiting to released movies, MOVIZ's availability has been limited to movies released during or before April 2025.
 - If you would like more information on the project details, especially regarding dataset cleaning justification and related processes, the documentation write-up is available [here](DATA440_Final_Project_Write-Up_(GitHub).pdf).
   - Note: In my references, I mention an IMDb dataset and a genres dataset-- they are the same and the names are used interchangeably.
+
+### Limitations
+- While *The Numbers* provides comprehensive financial data coverage for roughly 6000 films, visualizations involving **production budgets** or **worldwide gross earnings** will naturally be limited to this subset. As a result, financial analyses may not cover the full scope of TMDB and IMDb dataset offerings.
+- Some movies may be excluded from specific visualizations if they lack critical plotting variables as observations. For example:
+  - A movie missing **production budget** may not appear on visualizations where **production budget** is used as a plotted axis (x or y), even if it matches filter criteria.
+- This discrepancy may arise from the inherent difference in available data coverage across datasets. This is to be expected when merging sources with varying levels of detail and coverage.
 
 ## Project Support
 This project was built with Python **3.12.8** and uses ([`uv`](https://docs.astral.sh/uv/getting-started/installation/)) for virtual environment and package management. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found ([here](https://docs.astral.sh/uv/)). 
 
 To launch the application and begin visualization for the first time, clone the repository and run with ```python main.py```. The application will automatically check for existing data and prompt you to run the pipeline if needed. Once the data is ready, the dashboard will launch at `http://localhost:8050/`.
-
 
 ## Project Structure
 ```
@@ -62,7 +66,7 @@ data/
 logs/
 src/
 ├── dash/
-│   ├── dashboard_testing.py
+│   ├── dashboard_testing.py	
 │   └── movie_db.py
 ├── database/
 │   └── database.py
@@ -97,4 +101,4 @@ This project is product of my love for movies and statistics. MOVIZ's data was c
 ## Future Improvements
 - Expand available visualization features and filtering options
 - Incorporate a movie recommendation system based on visualization insights
-- Futher optimize performance for large datasets
+- Further optimize performance for large datasets
