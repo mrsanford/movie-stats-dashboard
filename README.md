@@ -19,8 +19,8 @@ The project implements a full data pipeline and outputs an interative GUI:
   - time spans from 1880 to 04/2025 to allow for leniency in the inclusion of the earliest movies. The basis for 1880 comes from the first motion picture created, the [*Roundhay Garden Scene*]([url](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.)) in 1888. In line with released movies, MOVIZ is limited to movies released on or before April 2025.
   - genre_db certificates and developing equivalencies
   - 
-- **Relational Database Construction**
-  Including the RDB table schema
+- **Relational Database Table Construction**
+![MoVIZ Database Tables](MoVIZ_RDb.pdf)
 
 - **Interactive Visualization GUI**
 
@@ -28,10 +28,9 @@ The project implements a full data pipeline and outputs an interative GUI:
 ### Considerations
 
 ## Project Support
-This project was built with Python **3.12.8** and uses [`uv`]([url](https://docs.astral.sh/uv/getting-started/installation/)) as the virtual environment and package manager. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found [here]([url](https://docs.astral.sh/uv/)). 
+This project was built with Python **3.12.8** and uses [`uv`]([url](https://docs.astral.sh/uv/getting-started/installation/)) as for virtual environment and package management. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found [here]([url](https://docs.astral.sh/uv/)). 
 
-To launch the application and to begin visualization, clone the repository and run the GUI with
-```python main.py```
+To launch the application and begin visualization for the first time, clone the repository and run with ```python main.py```. Note: you will need to complete the dataset downloads, cleaning and mergging, and the database creation steps prior to launching the GUI.
 
 ## Project Structure
 ```
@@ -57,7 +56,6 @@ src/
 └── utils/
     ├── helpers.py
     └── logging.py
-
 .gitattributes
 .gitignore
 .python-version
