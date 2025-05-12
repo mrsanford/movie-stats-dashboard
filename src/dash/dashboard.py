@@ -300,7 +300,7 @@ def generate_filter_widgets(selected, user_filters):
                 id={"type": "filter-dropdown", "index": col},
                 options=[{"label": v, "value": v} for v in options],
                 multi=True,
-                value=user_val if user_val else options,
+                value=user_val if user_val else None,
             )
             widgets.append(
                 html.Div(
@@ -419,18 +419,18 @@ def update_axis_options(data):
 def validate_axis_selection(x, y, data):
     if not x or not y or not data:
         return "", True  # disables button if not ready
-
+    # preventing user from selecting same variable for both axes
+    if x == y:
+        return f"Invalid Selection: X and Y cannot be the same variable ('{x}').", True
     df = pd.DataFrame(data)
     x_type = df[x].dtype
     y_type = df[y].dtype
-
     # if x is numeric and y is categorical -> not allowed
     if pd.api.types.is_numeric_dtype(x_type) and not pd.api.types.is_numeric_dtype(
         y_type
     ):
         warning = f"Invalid Plot Selection: Cannot plot quantitative '{x}' on X with qualitative '{y}' on Y. Please select a different combination."
         return warning, True
-
     # disables button if both are empty or invalid
     return "", False
 
