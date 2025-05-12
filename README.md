@@ -1,6 +1,5 @@
-# **MOVIZ Visualization Tool**
+# **MOVIZ Visualization Tool – *Welcome to MoVIZ 🎞* **
 
-## Overview – Welcome to MoVIZ 🎞
 *MOVIZ* enable users to visualize movie statistics ranging from budget indie projects to record-breaking blockbusters, from the earliest films to newest releases.
 The project implements a full data pipeline to ingest up-to-date datasets from TMDB, IMDb, and *The Numbers* budget dataset, applying normalization and various cleaning methods, and a robust database. The MoVIZ database contains a wide array of films from 1880 to 2025. Users can filter their desired characteristics, analyze, and visualize relationships between genres, decades, certificates, ratings, production budgets, and worldwide box office gross, all with a user-friend GUI. 
 
@@ -53,10 +52,12 @@ Due to GitHub's max limit on the size of dataset files, I have opted not to push
   - A movie missing **production budget** may not appear on visualizations where **production budget** is used as a plotted axis (x or y), even if it matches filter criteria.
 - This discrepancy may arise from the inherent difference in available data coverage across datasets. This is to be expected when merging sources with varying levels of detail and coverage.
 
+
 ## Project Support
 This project was built with Python **3.12.8** and uses ([`uv`](https://docs.astral.sh/uv/getting-started/installation/)) for virtual environment and package management. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found ([here](https://docs.astral.sh/uv/)). 
 
 To launch the application and begin visualization for the first time, clone the repository and run with ```python main.py```. The application will automatically check for existing data and prompt you to run the pipeline if needed. Once the data is ready, the dashboard will launch at `http://localhost:8050/`.
+
 
 ## Project Structure
 ```
@@ -97,6 +98,7 @@ This project is product of my love for movies and statistics. MOVIZ's data was c
 2. [u/ChidambaraRaju](https://github.com/ChidambaraRaju)'s ['IMDb Movie Dataset: All Movies by Genre'](https://www.kaggle.com/datasets/rajugc/imdb-movies-dataset-based-on-genre) via Kaggle
 3. Movie Budget data from [The-Numbers.com](https://www.the-numbers.com/movie/budgets/all)
 4. Thank you to https://dbdiagram.io/home, which was used to create my database table logic
+
 
 ## Future Improvements
 - Expand available visualization features and filtering options
