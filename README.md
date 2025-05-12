@@ -3,14 +3,13 @@
 ## Overview
 *MOVIZ* enables users to visualize trends in movie statistics from small, independent projects to record-breaking blockbusters, from the earliest films to the newest releases.
 
-rmation**
-  - diagram of normalized column names and dataset equivalencies
-  - dropped columns
 ### Features
 The project implements a full data pipeline and outputs an interative GUI:
 - **Data Ingestion**
   - Automatically downloads and loads datasets from TMDb, IMDb Genres, and budget [project datasets](#Acknowledgements)
-- **Data Cleaning & Transfo
+- **Data Cleaning & Transformation**
+  - diagram of normalized column names and dataset equivalencies
+  - dropped columns
   - missing values
   - transformations/assumptions included augmented/added columns
   - normalized fields
