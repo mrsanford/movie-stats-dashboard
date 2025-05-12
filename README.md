@@ -5,24 +5,32 @@
 
 ### Features
 
-The project implements a full data pipeline and outputs an interactive GUI:
-- **Data Ingestion**
-  - Automatically downloads and loads datasets from TMDB, IMDb Genres, and budget [project datasets](#Acknowledgements)
-- **Data Cleaning & Transformation**
-  - diagram of normalized column names and dataset equivalencies
-  - dropped columns
-  - missing values
-  - transformations/assumptions included augmented/added columns
-  - normalized fields
-  - removed duplicates
-  - removed adult films in tmdb.csv
-  - limited to released movies (no upcoming or rumored, etc.)
-  - time spans from 1880 to 04/2025 to allow for leniency in the inclusion of the earliest movies. The basis for 1880 comes from the first motion picture created, the [*Roundhay Garden Scene*]([url](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.)) in 1888. In line with released movies, MOVIZ is limited to movies released on or before April 2025.
-  - genre_db certificates and developing equivalencies
-  - 
+**Data Ingestion and Cleaning**
+The pipeline handles the downloading and loading datasets from TMDB, IMDb Genres, and budget [project datasets](#Acknowledgements). Each dataset contributes various data to MoVIZ.
+- TMDB dataset: comprehensive movie metadata (title, release date, ratings, etc.)
+- IMDb Genres dataset: genres, equivalency id mappings, certificates
+- Budget dataset: production budgets, domestic and worldwide gross earnings
 
-**Relational Database Table Construction**
-Below is the relational database structure used for MoVIZ
+This portion of the pipeline prepares data for database ingestion by ensuring consistency across datasets through data type and column normalization, handling format discrepancies and missing values.
+- **Title Normalization**: lowercased all text and removed whitespace/special characters to ensure ease in merging on fallback keys
+- **Year Extraction**: extracted year from various date formats in all three datasets, and enforced date range (1880-2025)
+- **Certificate Mapping**: realigned certificates to the MPAA rating system
+- **Genre Mapping**: standardized genre names
+- **Duplicate Removal**: removed duplicates by ```imdb_id``` for the Genres dataset and ```movie_id``` for the TMDB dataset, then performed a fallback drop to remove duplicates on ```normalized_title``` and ```year```
+- **Adult Content & Status Filtering**: excluded adult films and any non-'Released' film titles in the TMDB dataset
+- **Dataset Augmentation**: added ```decade``` column for enhanced historical handling
+- **Null Value Handling**: created a critical and non-critical column threshold; dropped rows with null values in critical columns and implemented secondary framework to remove rows given 80% of data was missing in non-critical columns
+- **Column Normalization**: standardized column names across all the datasets
+
+**Data Merging and Table Relationships**
+- TMDB and Genres Merge: merged on ```movie_id``` and falls back to match on ```normalized_title``` + ```year```
+- Budget Mapping: linked budget by ```normalized_title``` + ```year``` since the budget dataset does not initially have a ```movie_id``` column; it prioritizes the fallback matches to the TMDB dataset (since greater number of movies and potential matches) then falls back to the genres dataset
+- Genre Lookup Table: generated unique genre table with ```genre_id``` and  ```genre_name```
+- Movie-Genre Pivot Table: created many-to-many relationship between movies and genres (movies may have multiple genres)
+
+
+**Relational Database Table Diagram**
+- Here are the database logic tables used for MoVIZ.
 <p align="center">
   <img src="MoVIZ_RDb.png" width="500" alt="MoVIZ Database Tables Diagram">
 </p>
@@ -36,6 +44,7 @@ The implementation has been created with Dash.
 - While *The Numbers* contains comprehensive financial coverage for roughly ~6000 films, please be aware that movies filtered on financial data may be limited in offerings compared to the larger offerings of films by TMDB and the IMDb datasets.
 - If you would like more information on the project details, especially regarding dataset cleaning justification and related processes, the ![write-up](DATA440_Final_Project_Write-Up_(GitHub).pdf) is available.
   - Note: In my references, I mention an IMDb dataset and a genres dataset-- they are the same and the names are used interchangeably.
+- The decision for the date range from ```1880-1889``` to 04/2025 is to allow for leniency and to allow for the earliest movies to be included. The basis for 1880 comes from the first motion picture created, the [*Roundhay Garden Scene*]([url](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.)) in 1888. In line with released movies, MOVIZ is limited to movies released on or before April 2025.
 
 ## Project Support
 This project was built with Python **3.12.8** and uses [`uv`]([url](https://docs.astral.sh/uv/getting-started/installation/)) as for virtual environment and package management. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found [here]([url](https://docs.astral.sh/uv/)). 
