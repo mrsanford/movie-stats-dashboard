@@ -20,7 +20,7 @@ This portion of the pipeline prepares data for database ingestion by ensuring co
 - **Duplicate Removal**: removed duplicates by ```imdb_id``` for the Genres dataset and ```movie_id``` for the TMDB dataset, then performed a fallback drop to remove duplicates on ```normalized_title``` and ```year```
 - **Adult Content & Status Filtering**: excluded adult films and any non-'Released' film titles in the TMDB dataset
 - **Dataset Augmentation**: added ```decade``` column for enhanced historical handling in all three datasets
-- **Null Value Handling**: implemented a critical and non-critical column hierarchy and threshold (i.e. title and date would be considered critical to a film's identification but certificate may be considered non-critical); dropped rows with null values in critical columns and implemented secondary framework to remove rows given 80% of data was missing in non-critical columns
+- **Null Value Handling**: implemented a critical and non-critical column hierarchy and threshold (i.e. title and date would be considered critical to a film's identification, but certificate may be considered non-critical); dropped rows with null values in critical columns and implemented secondary framework to remove rows given 80% of data was missing in non-critical columns
 - **Column Normalization**: standardized column names across all the datasets for ease of merging for the database step
 
 **Relational Database Table Diagram**
@@ -41,17 +41,15 @@ The implementation has been built with ([Dash](https://dash.plotly.com/)). Users
 - Selecting customizable ranges and explorable values for their filters
 - Exploring different types of data with dynamic plot types including scatter plots, bar charts, and stacked bar charts
 
-
 ### Considerations
 - While *The Numbers* contains comprehensive financial coverage for roughly ~6000 films, please be aware that movies filtered on financial data may be limited in offerings compared to the larger offerings of films by TMDB and the IMDb datasets.
 - Due to GitHub's max limit on the size of dataset files, I have opted not to push ```/processed``` and ```/raw``` files and folders; however, the framework will populate and become available upon cloning the repository and running the pipeline.
-- The decision for the date ranges from ```1880-1889``` to 04/2025 is to allow for leniency and to allow for the earliest movies to be included. The basis for 1880 comes from the first motion picture created, the ([*Roundhay Garden Scene*](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.)) in 1888. In line with released movies, MOVIZ is limited to movies released on or before April 2025.
+- The decision for the date ranges from ```1880-1889``` to 04/2025 is to allow for leniency and to allow for the earliest movies to be included. The basis for 1880 comes from the first motion picture created, the [*Roundhay Garden Scene*](https://en.wikipedia.org/wiki/List_of_cinematic_firsts#:~:text=1888,the%20first%20motion%20picture%20recorded.) in 1888. In style with the limiting to released movies, MOVIZ's availability has been limited to movies released during or before April 2025.
 - If you would like more information on the project details, especially regarding dataset cleaning justification and related processes, the documentation write-up is available ![here](DATA440_Final_Project_Write-Up_(GitHub).pdf).
   - Note: In my references, I mention an IMDb dataset and a genres dataset-- they are the same and the names are used interchangeably.
 
-
 ## Project Support
-This project was built with Python **3.12.8** and uses ([`uv`](https://docs.astral.sh/uv/getting-started/installation/)) as for virtual environment and package management. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found ([here](https://docs.astral.sh/uv/)). 
+This project was built with Python **3.12.8** and uses ([`uv`](https://docs.astral.sh/uv/getting-started/installation/)) for virtual environment and package management. MOVIZ's dependencies have been listed in `pyproject.toml`. The official documentation for the tool can be found ([here](https://docs.astral.sh/uv/)). 
 
 To launch the application and begin visualization for the first time, clone the repository and run with ```python main.py```. Note: you will need to complete the dataset downloads, cleaning and merging, and the database creation steps prior to launching the GUI. The pipeline includes frameworks to process these steps, but you will need to follow the directions when prompted.
 
@@ -94,4 +92,3 @@ This project is product of my love for movies and statistics. MOVIZ's data was c
 2. [u/ChidambaraRaju](https://github.com/ChidambaraRaju)'s ['IMDb Movie Dataset: All Movies by Genre'](https://www.kaggle.com/datasets/rajugc/imdb-movies-dataset-based-on-genre) via Kaggle
 3. Movie Budget data from [The-Numbers.com](https://www.the-numbers.com/movie/budgets/all)
 4. Thank you to https://dbdiagram.io/home, which was used to create my database table logic
-
